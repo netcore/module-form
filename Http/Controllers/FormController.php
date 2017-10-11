@@ -32,8 +32,9 @@ class FormController extends Controller
     {
         $languages = TransHelper::getAllLanguages();
         $fields = $this->getFields();
+        $routes = $this->getRoutes();
 
-        return view('form::create', compact('languages', 'fields'));
+        return view('form::create', compact('languages', 'fields', 'routes'));
     }
 
     /**
@@ -73,8 +74,9 @@ class FormController extends Controller
     {
         $languages = TransHelper::getAllLanguages();
         $fields = $this->getFields($form);
+        $routes = $this->getRoutes();
 
-        return view('form::edit', compact('form', 'languages', 'fields'));
+        return view('form::edit', compact('form', 'languages', 'fields', 'routes'));
     }
 
     /**
@@ -88,8 +90,15 @@ class FormController extends Controller
     {
         $form->update($request->only(['name', 'type', 'type_value']));
 
-        // Fields
-        foreach ($request->get('fields', []) as $formField) {
+        $formFields = $form->fields->toArray();
+        $newFields = $request->get('fields', []);
+
+        // Add fields
+        $fieldsToAdd = array_udiff($newFields, $formFields, function ($a, $b) {
+            return strcmp($a['key'], $b['key']);
+        });
+
+        foreach ($fieldsToAdd as $formField) {
             $field = $form->fields()->where('key', $formField['key'])->first();
 
             if (!$field) {
@@ -113,6 +122,21 @@ class FormController extends Controller
 
                 $field->updateTranslations($formField['translations']);
             }
+        }
+
+        // Remove fields
+        $fieldsToRemove = array_udiff($formFields, $newFields, function ($a, $b) {
+            return strcmp($a['key'], $b['key']);
+        });
+        
+        foreach ($fieldsToRemove as $formField) {
+            $field = $form->fields()->where('key', $formField['key'])->first();
+
+            if (!$field) {
+                continue;
+            }
+
+            $field->delete();
         }
 
         return back()->withSuccess('Successfully saved');
@@ -184,5 +208,29 @@ class FormController extends Controller
             'translations' => $translations,
             'order'        => $id + 1
         ];
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    private function getRoutes()
+    {
+        $routes = [];
+
+        foreach (\Route::getRoutes() as $route) {
+            if (in_array('POST', $route->methods()) || in_array('PUT', $route->methods()) || in_array('PATCH',
+                    $route->methods())) {
+                if ($route->getName()) {
+                    $exploded = explode('.', $route->getName());
+                    if (isset($exploded[0]) && $exploded[0] == 'debugbar' || strpos($exploded[0], '::') !== false) {
+                        continue;
+                    }
+
+                    $routes[] = $route->getName();
+                }
+            }
+        }
+
+        return collect($routes);
     }
 }
