@@ -35,6 +35,10 @@ class Form extends Model
      */
     public function getAction()
     {
+        if ($this->type == 'url') {
+            return $this->type_value;
+        }
+
         return '';
     }
 }
