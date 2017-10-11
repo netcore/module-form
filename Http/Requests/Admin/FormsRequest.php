@@ -23,13 +23,19 @@ class FormsRequest extends FormRequest
      */
     public function rules()
     {
+        $form = $this->form;
+        $uniqueRule = 'unique:netcore_form__form_fields' . ($form ? ',form_id,' . $form->id . ',id' : '');
+
         return [
             'name'         => 'required',
             'type'         => 'required',
             'type_value'   => 'required',
 
             'fields'       => 'required',
-            'fields.*.key' => 'required'
+            'fields.*.key' => [
+                'required',
+                $uniqueRule
+            ]
         ];
     }
 }

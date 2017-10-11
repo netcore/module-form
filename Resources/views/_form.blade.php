@@ -31,9 +31,9 @@
 
     <div class="col-lg-6">
         <div id="accordion" role="tablist" aria-multiselectable="true">
-            <div class="panel panel-default" v-for="field in formFields">
-                <form-field :data="field" v-on:remove-field="removeField(field)" :languages="languages"></form-field>
-            </div>
+            <draggable v-model="formFields" @update="updateOrder">
+                <form-field v-for="field in formFields" :data="field" :key="field.id" v-on:remove-field="removeField(field)" :languages="languages"></form-field>
+            </draggable>
         </div>
     </div>
 </div>

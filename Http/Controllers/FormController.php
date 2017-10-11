@@ -52,7 +52,7 @@ class FormController extends Controller
                 'key'   => $formField['key'],
                 'type'  => $formField['type'],
                 'meta'  => [
-                    'attributes' => $formField['validation']
+                    'attributes' => isset($formField['validation']) ? $formField['validation'] : []
                 ],
                 'order' => $order + 1
             ]);
@@ -89,7 +89,7 @@ class FormController extends Controller
         $form->update($request->only(['name', 'type', 'type_value']));
 
         // Fields
-        foreach ($request->get('fields', []) as $order => $formField) {
+        foreach ($request->get('fields', []) as $formField) {
             $field = $form->fields()->where('key', $formField['key'])->first();
 
             if (!$field) {
@@ -99,7 +99,7 @@ class FormController extends Controller
                     'meta'  => [
                         'attributes' => isset($formField['validation']) ? $formField['validation'] : []
                     ],
-                    'order' => $order + 1
+                    'order' => $formField['order']
                 ]);
 
                 $field->storeTranslations($formField['translations']);
@@ -108,7 +108,7 @@ class FormController extends Controller
                     'meta'  => [
                         'attributes' => isset($formField['validation']) ? $formField['validation'] : []
                     ],
-                    'order' => $order
+                    'order' => $formField['order']
                 ]);
 
                 $field->updateTranslations($formField['translations']);
@@ -146,7 +146,7 @@ class FormController extends Controller
         $oldFields = old('fields', []);
 
         if ($data) {
-            $currentFields = $data->fields()->with('translations')->get()->toArray();
+            $currentFields = $data->fields()->with('translations')->orderBy('order', 'ASC')->get()->toArray();
         }
 
         $fields = collect(array_merge($oldFields, $currentFields))->map(function ($field, $id) {
@@ -181,7 +181,8 @@ class FormController extends Controller
             'key'          => $field['key'],
             'type'         => $field['type'],
             'type_name'    => ucfirst($field['type']),
-            'translations' => $translations
+            'translations' => $translations,
+            'order'        => $id + 1
         ];
     }
 }

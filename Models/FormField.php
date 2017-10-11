@@ -46,6 +46,11 @@ class FormField extends Model
     ];
 
     /**
+     * @var array
+     */
+    protected $with = ['translations'];
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function form()

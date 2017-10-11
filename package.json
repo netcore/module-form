@@ -13,6 +13,7 @@
     "cross-env": "^5.0.1",
     "exec": "^0.2.1",
     "laravel-mix": "^1.0",
-    "node-exec": "^0.1.1"
+    "node-exec": "^0.1.1",
+    "vuedraggable": "^2.14.1"
   }
 }
