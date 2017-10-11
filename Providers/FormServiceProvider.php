@@ -4,6 +4,7 @@ namespace Modules\Form\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\Form\Repositories\FormsRepository;
 
 class FormServiceProvider extends ServiceProvider
 {
@@ -35,7 +36,9 @@ class FormServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton('forms', function () {
+            return new FormsRepository();
+        });
     }
 
     /**

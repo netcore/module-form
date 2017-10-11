@@ -24,9 +24,12 @@ class FormsRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'       => 'required',
-            'type'       => 'required',
-            'type_value' => 'required'
+            'name'         => 'required',
+            'type'         => 'required',
+            'type_value'   => 'required',
+
+            'fields'       => 'required',
+            'fields.*.key' => 'required'
         ];
     }
 }

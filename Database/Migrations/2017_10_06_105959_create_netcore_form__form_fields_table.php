@@ -17,14 +17,24 @@ class CreateNetcoreFormFormFieldsTable extends Migration
             $table->increments('id');
 
             $table->unsignedInteger('form_id');
+            $table->foreign('form_id')->references('id')->on('netcore_form__forms')->onDelete('cascade');
+
             $table->string('key');
-            $table->string('name');
             $table->string('type');
             $table->text('meta')->nullable();
+            $table->smallInteger('order');
 
             $table->timestamps();
+        });
 
-            $table->foreign('form_id')->references('id')->on('netcore_form__forms')->onDelete('cascade');
+        Schema::create('netcore_form__form_field_translations', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->unsignedInteger('form_field_id');
+            $table->foreign('form_field_id')->references('id')->on('netcore_form__form_fields')->onDelete('cascade');
+
+            $table->string('locale')->index();
+            $table->string('label');
         });
     }
 
@@ -35,6 +45,7 @@ class CreateNetcoreFormFormFieldsTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('netcore_form__form_field_translations');
         Schema::dropIfExists('netcore_form__form_fields');
     }
 }

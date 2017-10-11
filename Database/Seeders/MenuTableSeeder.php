@@ -25,7 +25,8 @@ class MenuTableSeeder extends Seeder
                     'type'            => 'route',
                     'value'           => 'admin::form.index',
                     'active_resolver' => 'admin::form.*',
-                    'module'          => 'Form'
+                    'module'          => 'Form',
+                    'parameters'      => json_encode([])
                 ]
             ]
         ];

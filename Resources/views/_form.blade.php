@@ -1,3 +1,7 @@
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('assets/form/admin/css/form.css') }}">
+@endsection
+
 <div class="form-group no-margin-hr">
     {!! Form::label('name', 'Name') !!}
     {!! Form::text('name', null, ['class' => 'form-control']) !!}
@@ -12,3 +16,35 @@
     {!! Form::label('type_value', 'Type value') !!}
     {!! Form::text('type_value', null, ['class' => 'form-control']) !!}
 </div>
+
+<hr>
+
+<div class="row">
+    <div class="col-lg-6">
+        <ul class="fields">
+            <li v-for="field in availableFields" @click="addField(field)" v-cloak>
+                @{{ field.name }}
+                <i class="fa fa-chevron-right"></i>
+            </li>
+        </ul>
+    </div>
+
+    <div class="col-lg-6">
+        <div id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default" v-for="field in formFields">
+                <form-field :data="field" v-on:remove-field="removeField(field)" :languages="languages"></form-field>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section('scripts')
+    <script>
+        var languages = '{{ json_encode($languages) }}';
+        var currentFields = '{{ json_encode(($fields ?: []), JSON_UNESCAPED_UNICODE) }}';
+
+        languages = JSON.parse(languages.replace(/&quot;/g, '"'));
+        currentFields = JSON.parse(currentFields.replace(/&quot;/g, '"'));
+    </script>
+    <script src="{{ asset('assets/form/admin/js/form.js') }}"></script>
+@endsection

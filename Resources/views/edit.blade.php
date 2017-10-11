@@ -9,7 +9,7 @@
                 <div class="panel-heading">
                     <h4 class="panel-title">Edit form</h4>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" id="formApp">
                     {!! Form::model($form, ['route' => ['admin::form.update', $form], 'method' => 'PATCH']) !!}
 
                     @include('form::_form')

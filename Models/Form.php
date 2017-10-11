@@ -29,4 +29,12 @@ class Form extends Model
     {
         return $this->hasMany(FormField::class);
     }
+
+    /**
+     * @return string
+     */
+    public function getAction()
+    {
+        return '';
+    }
 }

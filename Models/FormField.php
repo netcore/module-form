@@ -2,10 +2,14 @@
 
 namespace Modules\Form\Models;
 
+use Dimsav\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Content\Traits\SyncTranslations;
+use Modules\Form\Translations\FormFieldTranslation;
 
 class FormField extends Model
 {
+    use Translatable, SyncTranslations;
 
     /**
      * @var string
@@ -17,9 +21,9 @@ class FormField extends Model
      */
     protected $fillable = [
         'key',
-        'name',
         'type',
-        'meta'
+        'meta',
+        'order'
     ];
 
     /**
@@ -27,6 +31,18 @@ class FormField extends Model
      */
     protected $casts = [
         'meta' => 'array'
+    ];
+
+    /**
+     * @var string
+     */
+    public $translationModel = FormFieldTranslation::class;
+
+    /**
+     * @var array
+     */
+    public $translatedAttributes = [
+        'label'
     ];
 
     /**
@@ -74,5 +90,17 @@ class FormField extends Model
         }
 
         return $options;
+    }
+
+    /**
+     * @return string
+     */
+    private function getClass()
+    {
+        $classes = [
+            'checkbox' => '',
+        ];
+
+        return array_get($classes, $this->type, 'form-control');
     }
 }

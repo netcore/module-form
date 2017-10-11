@@ -9,7 +9,7 @@
                 <div class="panel-heading">
                     <h4 class="panel-title">Edit form</h4>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" id="formApp">
                     {!! Form::open(['route' => 'admin::form.store']) !!}
 
                     @include('form::_form')
