@@ -1,19 +1,30 @@
 <?php
 
 Route::group([
-    'middleware' => ['web', 'auth.admin'],
-    'prefix'     => 'admin',
+    'middleware' => ['web'],
     'namespace'  => 'Modules\Form\Http\Controllers'
 ], function () {
-    Route::resource('forms', 'FormController', [
+    Route::put('/form/{form}', [
+        'as'   => 'form::store',
+        'uses' => 'FormController@store'
+    ]);
+});
+
+Route::group([
+    'middleware' => ['web', 'auth.admin'],
+    'prefix'     => 'admin',
+    'as'         => 'admin::',
+    'namespace'  => 'Modules\Form\Http\Controllers\Admin'
+], function () {
+    Route::resource('form', 'FormController', [
         'except' => ['show'],
-        'names'  => [
-            'index'   => 'admin::form.index',
-            'create'  => 'admin::form.create',
-            'store'   => 'admin::form.store',
-            'edit'    => 'admin::form.edit',
-            'update'  => 'admin::form.update',
-            'destroy' => 'admin::form.destroy',
-        ]
+    ]);
+    Route::resource('form.entries', 'FormEntryController', [
+        'only' => ['index', 'destroy'],
+    ]);
+
+    Route::get('form/{form}/entries/pagination', [
+        'as' => 'form.entries.pagination',
+        'uses' => 'FormEntryController@pagination'
     ]);
 });

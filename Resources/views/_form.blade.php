@@ -7,16 +7,6 @@
     {!! Form::text('name', null, ['class' => 'form-control']) !!}
 </div>
 
-<div class="form-group no-margin-hr">
-    {!! Form::label('type', 'Type') !!}
-    {!! Form::select('type', ['url' => 'URL'], null, ['class' => 'form-control']) !!}
-</div>
-
-<div class="form-group no-margin-hr">
-    {!! Form::label('type_value', 'URL') !!}
-    {!! Form::text('type_value', null, ['class' => 'form-control']) !!}
-</div>
-
 <hr>
 
 <div class="row">

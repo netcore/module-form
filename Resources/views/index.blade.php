@@ -25,7 +25,10 @@
                             @foreach ($forms as $form)
                                 <tr>
                                     <td>{{ $form->name }}</td>
-                                    <td width="10%" class="text-center">
+                                    <td width="15%" class="text-center">
+                                        <a href="{{ route('admin::form.entries.index', $form) }}" class="btn btn-xs btn-default">
+                                            <i class="fa fa-eye"></i> Entries ({{ count($form->getEntries()) }})
+                                        </a>
                                         <a href="{{ route('admin::form.edit', $form) }}" class="btn btn-xs btn-warning">
                                             <i class="fa fa-edit"></i> Edit
                                         </a>

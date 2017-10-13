@@ -32,9 +32,9 @@ class FormsRepository
      */
     private function form(Form $form)
     {
-        $html = '<form method="POST" action="' . $form->getAction() .'" enctype="multipart/form-data">';
+        $html = FormFacade::open(['route' => ['form::store', $form->id], 'method' => 'PUT', 'files' => true]);
         $html .= $this->fields($form->fields);
-        $html .= '</form>';
+        $html .= FormFacade::close();
 
         return $html;
     }
@@ -53,6 +53,8 @@ class FormsRepository
             $html .= $this->{$field->type}($field);
             $html .= '</div>';
         }
+
+        $html .= '<button type="submit" class="btn btn-success">Submit</button>';
 
         return $html;
     }
