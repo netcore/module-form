@@ -51,7 +51,8 @@
                                 :data="[{id: 'required', 'text': 'Required'}]"
                                 :name="'fields['+model.id+'][validation][]'"
                                 :placeholder="'Please select'"
-                                :options="{multiple:true}"
+                                :multiple="true"
+                                v-model="test_variable"
                         ></select2>
                     </div>
 
@@ -70,6 +71,12 @@
         props: {
             data: Object,
             languages: Array,
+        },
+
+        data: function(){
+            return {
+                test_variable: []
+            }
         },
 
         computed: {
