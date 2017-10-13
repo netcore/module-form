@@ -29,7 +29,6 @@ class FormEntryController extends Controller
      */
     public function index(Form $form)
     {
-        //dd($form->getEntries());
         return view('form::entries.index', compact('form'));
     }
 

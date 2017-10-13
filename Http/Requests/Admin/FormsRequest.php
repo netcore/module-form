@@ -28,9 +28,6 @@ class FormsRequest extends FormRequest
 
         return [
             'name'         => 'required',
-            'type'         => 'required',
-            'type_value'   => 'required',
-
             'fields'       => 'required',
             'fields.*.key' => [
                 'required',
