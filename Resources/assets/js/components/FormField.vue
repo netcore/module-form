@@ -46,14 +46,28 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Validation</label>
+                        <label>Attributes</label>
                         <select2
-                                :data="[{id: 'required', 'text': 'Required'}]"
-                                :name="'fields['+model.id+'][validation][]'"
+                                :data="[{id: 'required', 'text': 'Required'}, {id: 'disabled', 'text': 'Disabled'}, {id: 'min', 'text': 'Min'}, {id: 'max', 'text': 'Max'}, {id: 'class', 'text': 'Class'}]"
+                                :name="'fields['+model.id+'][attributes][]'"
                                 :placeholder="'Please select'"
                                 :multiple="true"
-                                v-model="test_variable"
+                                v-model="attributes"
                         ></select2>
+                    </div>
+
+                    <div class="form-group" v-if="model.type == 'select'">
+                        <label>Options</label>
+                        <br>
+                        <button type="button" class="btn btn-success btn-xs" @click="addOption()">
+                            <i class="fa fa-plus"></i> Add Field
+                        </button>
+                        <br>
+                        <div class="input-group" v-for="option in options">
+                            <input type="text" :name="'fields['+model.id+'][options][value][]'" class="form-control"/>
+                            <span class="input-group-addon">-</span>
+                            <input type="text" :name="'fields['+model.id+'][options][text][]'" class="form-control"/>
+                        </div>
                     </div>
 
                     <a href="javascript:;" class="btn btn-xs btn-danger pull-right" @click="remove(model)">
@@ -73,9 +87,10 @@
             languages: Array,
         },
 
-        data: function(){
+        data: function () {
             return {
-                test_variable: []
+                attributes: [],
+                options: []
             }
         },
 
@@ -99,6 +114,10 @@
         },
 
         methods: {
+            addOption() {
+                this.options.push([]);
+            },
+
             remove(field) {
                 this.$emit('remove-field', field);
             }

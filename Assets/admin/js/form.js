@@ -2053,8 +2053,6 @@ var normalizeComponent = __webpack_require__(5)
 var __vue_script__ = __webpack_require__(6)
 /* template */
 var __vue_template__ = __webpack_require__(7)
-/* template functional */
-  var __vue_template_functional__ = false
 /* styles */
 var __vue_styles__ = null
 /* scopeId */
@@ -2064,13 +2062,13 @@ var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __vue_script__,
   __vue_template__,
-  __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "Resources/assets/js/components/FormField.vue"
-if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
+Component.options.__file = "Resources\\assets\\js\\components\\FormField.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] FormField.vue: functional components are not supported with templates, they should use render functions.")}
 
 /* hot reload */
 if (false) {(function () {
@@ -2097,14 +2095,12 @@ module.exports = Component.exports
 
 /* globals __VUE_SSR_CONTEXT__ */
 
-// IMPORTANT: Do NOT use ES2015 features in this file.
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
+// this module is a runtime utility for cleaner component module output and will
+// be included in the final webpack user bundle
 
 module.exports = function normalizeComponent (
   rawScriptExports,
   compiledTemplate,
-  functionalTemplate,
   injectStyles,
   scopeId,
   moduleIdentifier /* server only */
@@ -2128,12 +2124,6 @@ module.exports = function normalizeComponent (
   if (compiledTemplate) {
     options.render = compiledTemplate.render
     options.staticRenderFns = compiledTemplate.staticRenderFns
-    options._compiled = true
-  }
-
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
   }
 
   // scopedId
@@ -2174,7 +2164,6 @@ module.exports = function normalizeComponent (
     var existing = functional
       ? options.render
       : options.beforeCreate
-
     if (!functional) {
       // inject component registration as beforeCreate hook
       options.beforeCreate = existing
@@ -2270,6 +2259,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
 
@@ -2280,7 +2283,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     data: function data() {
         return {
-            test_variable: []
+            attributes: [],
+            options: []
         };
     },
 
@@ -2304,6 +2308,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
 
     methods: {
+        addOption: function addOption() {
+            this.options.push([]);
+        },
         remove: function remove(field) {
             this.$emit('remove-field', field);
         }
@@ -2516,26 +2523,90 @@ var render = function() {
               "div",
               { staticClass: "form-group" },
               [
-                _c("label", [_vm._v("Validation")]),
+                _c("label", [_vm._v("Attributes")]),
                 _vm._v(" "),
                 _c("select2", {
                   attrs: {
-                    data: [{ id: "required", text: "Required" }],
-                    name: "fields[" + _vm.model.id + "][validation][]",
+                    data: [
+                      { id: "required", text: "Required" },
+                      { id: "disabled", text: "Disabled" },
+                      { id: "min", text: "Min" },
+                      { id: "max", text: "Max" },
+                      { id: "class", text: "Class" }
+                    ],
+                    name: "fields[" + _vm.model.id + "][attributes][]",
                     placeholder: "Please select",
                     multiple: true
                   },
                   model: {
-                    value: _vm.test_variable,
+                    value: _vm.attributes,
                     callback: function($$v) {
-                      _vm.test_variable = $$v
+                      _vm.attributes = $$v
                     },
-                    expression: "test_variable"
+                    expression: "attributes"
                   }
                 })
               ],
               1
             ),
+            _vm._v(" "),
+            _vm.model.type == "select"
+              ? _c(
+                  "div",
+                  { staticClass: "form-group" },
+                  [
+                    _c("label", [_vm._v("Options")]),
+                    _vm._v(" "),
+                    _c("br"),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-success btn-xs",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            _vm.addOption()
+                          }
+                        }
+                      },
+                      [
+                        _c("i", { staticClass: "fa fa-plus" }),
+                        _vm._v(" Add Field\n                    ")
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c("br"),
+                    _vm._v(" "),
+                    _vm._l(_vm.options, function(option) {
+                      return _c("div", { staticClass: "input-group" }, [
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            name:
+                              "fields[" + _vm.model.id + "][options][value][]"
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("span", { staticClass: "input-group-addon" }, [
+                          _vm._v("-")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            name:
+                              "fields[" + _vm.model.id + "][options][text][]"
+                          }
+                        })
+                      ])
+                    })
+                  ],
+                  2
+                )
+              : _vm._e(),
             _vm._v(" "),
             _c(
               "a",
@@ -2574,7 +2645,7 @@ module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-639e14d9", module.exports)
+     require("vue-hot-reload-api").rerender("data-v-639e14d9", module.exports)
   }
 }
 

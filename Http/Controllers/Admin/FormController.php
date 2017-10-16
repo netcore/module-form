@@ -32,9 +32,8 @@ class FormController extends Controller
     {
         $languages = TransHelper::getAllLanguages();
         $fields = $this->getFields();
-        $routes = $this->getRoutes();
 
-        return view('form::create', compact('languages', 'fields', 'routes'));
+        return view('form::create', compact('languages', 'fields'));
     }
 
     /**
@@ -45,7 +44,7 @@ class FormController extends Controller
      */
     public function store(FormsRequest $request)
     {
-        $form = Form::create($request->only(['name', 'type', 'type_value']));
+        $form = Form::create($request->only(['name']));
 
         // Fields
         foreach ($request->get('fields', []) as $order => $formField) {
@@ -53,7 +52,8 @@ class FormController extends Controller
                 'key'   => $formField['key'],
                 'type'  => $formField['type'],
                 'meta'  => [
-                    'attributes' => isset($formField['validation']) ? $formField['validation'] : []
+                    'attributes' => isset($formField['attributes']) ? $formField['attributes'] : [],
+                    'options'    => isset($formField['options']) ? $formField['options'] : []
                 ],
                 'order' => $order + 1
             ]);
@@ -74,9 +74,8 @@ class FormController extends Controller
     {
         $languages = TransHelper::getAllLanguages();
         $fields = $this->getFields($form);
-        $routes = $this->getRoutes();
 
-        return view('form::edit', compact('form', 'languages', 'fields', 'routes'));
+        return view('form::edit', compact('form', 'languages', 'fields'));
     }
 
     /**
@@ -88,7 +87,8 @@ class FormController extends Controller
      */
     public function update(FormsRequest $request, Form $form)
     {
-        $form->update($request->only(['name', 'type', 'type_value']));
+        dd($request->all());
+        $form->update($request->only(['name']));
 
         $formFields = $form->fields->toArray();
         $newFields = $request->get('fields', []);
@@ -97,7 +97,6 @@ class FormController extends Controller
         $fieldsToAdd = array_udiff($newFields, $formFields, function ($a, $b) {
             return strcmp($a['key'], $b['key']);
         });
-
         foreach ($fieldsToAdd as $formField) {
             $field = $form->fields()->where('key', $formField['key'])->first();
 
@@ -106,7 +105,8 @@ class FormController extends Controller
                     'key'   => $formField['key'],
                     'type'  => $formField['type'],
                     'meta'  => [
-                        'attributes' => isset($formField['validation']) ? $formField['validation'] : []
+                        'attributes' => isset($formField['attributes']) ? $formField['attributes'] : [],
+                        'options'    => isset($formField['options']) ? $formField['options'] : []
                     ],
                     'order' => $formField['order']
                 ]);
@@ -115,7 +115,8 @@ class FormController extends Controller
             } else {
                 $field->update([
                     'meta'  => [
-                        'attributes' => isset($formField['validation']) ? $formField['validation'] : []
+                        'attributes' => isset($formField['attributes']) ? $formField['attributes'] : [],
+                        'options'    => isset($formField['options']) ? $formField['options'] : []
                     ],
                     'order' => $formField['order']
                 ]);
@@ -128,7 +129,6 @@ class FormController extends Controller
         $fieldsToRemove = array_udiff($formFields, $newFields, function ($a, $b) {
             return strcmp($a['key'], $b['key']);
         });
-
         foreach ($fieldsToRemove as $formField) {
             $field = $form->fields()->where('key', $formField['key'])->first();
 
@@ -208,29 +208,5 @@ class FormController extends Controller
             'translations' => $translations,
             'order'        => $id + 1
         ];
-    }
-
-    /**
-     * @return \Illuminate\Support\Collection
-     */
-    private function getRoutes()
-    {
-        $routes = [];
-
-        foreach (\Route::getRoutes() as $route) {
-            if (in_array('POST', $route->methods()) || in_array('PUT', $route->methods()) || in_array('PATCH',
-                    $route->methods())) {
-                if ($route->getName()) {
-                    $exploded = explode('.', $route->getName());
-                    if (isset($exploded[0]) && $exploded[0] == 'debugbar' || strpos($exploded[0], '::') !== false) {
-                        continue;
-                    }
-
-                    $routes[] = $route->getName();
-                }
-            }
-        }
-
-        return collect($routes);
     }
 }

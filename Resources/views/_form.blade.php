@@ -7,7 +7,7 @@
     {!! Form::text('name', null, ['class' => 'form-control']) !!}
 </div>
 
-<hr>
+{!! Form::label('fields', 'Fields') !!}
 
 <div class="row">
     <div class="col-lg-6">
