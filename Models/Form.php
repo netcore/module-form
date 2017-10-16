@@ -56,16 +56,23 @@ class Form extends Model
     }
 
     /**
+     * @param bool $limitValue
      * @return array
      */
-    public function getEntries()
+    public function getEntries($limitValue = false)
     {
+        $entries = $this->entries->groupBy('batch')->map(function ($entry) {
+            return $entry->keyBy('form_field_id');
+        })->toArray();
         $array = [];
-        foreach ($this->entries()->with('form_field')->get()->groupBy('batch') as $i => $entries) {
-            foreach ($entries as $entry) {
-                $array[$i]['id'] = $entry->batch;
-                $array[$i][$entry->form_field->key] = str_limit($entry->value, 50);
-                $array[$i]['submitted_at'] = $entry->created_at->format('d.m.Y H:i');
+
+        foreach ($entries as $i => $entry) {
+            $array[$i]['id'] = $i;
+            foreach ($this->fields as $f => $field) {
+                $array[$i][$field->key] = isset($entry[$field->id]) ? ($limitValue ? str_limit($entry[$field->id]['value'], 50) : $entry[$field->id]['value']) : '';
+                if (isset($entry[$field->id])) {
+                    $array[$i]['submitted_at'] = $entry[$field->id]['created_at'];
+                }
             }
         }
 

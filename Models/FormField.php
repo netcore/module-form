@@ -59,6 +59,14 @@ class FormField extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function entries()
+    {
+        return $this->hasMany(FormEntry::class);
+    }
+
+    /**
      * @return array
      */
     public function getAttributesData()
