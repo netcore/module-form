@@ -19,6 +19,7 @@ class Form extends Model
      * @var array
      */
     protected $fillable = [
+        'key',
         'name'
     ];
 
@@ -36,23 +37,6 @@ class Form extends Model
     public function entries()
     {
         return $this->hasMany(FormEntry::class);
-    }
-
-    /**
-     * @param $request
-     */
-    public function storeEntries($request)
-    {
-        $lastEntry = $this->entries()->latest()->first();
-        $lastBatch = $lastEntry ? $lastEntry->batch + 1 : 1;
-
-        foreach ($this->fields as $field) {
-            $this->entries()->create([
-                'form_field_id' => $field->id,
-                'value'         => $request->get($field->key, ''),
-                'batch'         => $lastBatch
-            ]);
-        }
     }
 
     /**
@@ -77,5 +61,42 @@ class Form extends Model
         }
 
         return $array;
+    }
+
+    /**
+     * @param $entries
+     * @return array
+     */
+    public function getEntry($entries)
+    {
+        if (!$entries) {
+            return [];
+        }
+
+        $entry = $entries->keyBy('form_field_id')->mapWithKeys(function ($e) {
+            if ($field = $e->form_field) {
+                return [$field->key => $e->value];
+            }
+        });
+
+        $entry->prepend($entries[0]->batch, 'id');
+        $entry->put('submitted_at', $entries[0]->created_at);
+
+        return $entry->toArray();
+    }
+
+    /**
+     * @param      $key
+     * @param      $batch
+     * @param null $default
+     * @return mixed
+     */
+    public function getValue($key, $batch, $default = null)
+    {
+        $entry = $this->entries()->where('batch', $batch)->whereHas('form_field', function ($q) use ($key) {
+            $q->where('key', $key);
+        })->first();
+
+        return $entry ? $entry->value : $default;
     }
 }

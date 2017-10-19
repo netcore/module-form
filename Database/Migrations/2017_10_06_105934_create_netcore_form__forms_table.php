@@ -16,6 +16,7 @@ class CreateNetcoreFormFormsTable extends Migration
         Schema::create('netcore_form__forms', function (Blueprint $table) {
             $table->increments('id');
 
+            $table->string('key')->index()->nullable();
             $table->string('name');
 
             $table->timestamps();

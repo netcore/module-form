@@ -15,7 +15,7 @@ class FormEntryController extends Controller
      */
     public function pagination(Form $form)
     {
-        $entries = $form->getEntries($limitValue=true);
+        $entries = $form->getEntries($limitValue = true);
 
         return datatables()->of($entries)->addColumn('actions', function ($entry) use ($form) {
             return view('form::entries.tds.actions', compact('form', 'entry'))->render();

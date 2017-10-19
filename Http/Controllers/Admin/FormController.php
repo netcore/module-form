@@ -52,8 +52,8 @@ class FormController extends Controller
                 'key'   => $formField['key'],
                 'type'  => $formField['type'],
                 'meta'  => [
-                    'attributes' => isset($formField['attributes']) ? $formField['attributes'] : [],
-                    'options'    => isset($formField['options']) ? $formField['options'] : []
+                    'attributes' => $this->parseAttributes($formField),
+                    'options'    => $this->parseOptions($formField)
                 ],
                 'order' => $order + 1
             ]);
@@ -87,17 +87,13 @@ class FormController extends Controller
      */
     public function update(FormsRequest $request, Form $form)
     {
-        dd($request->all());
         $form->update($request->only(['name']));
 
         $formFields = $form->fields->toArray();
         $newFields = $request->get('fields', []);
 
-        // Add fields
-        $fieldsToAdd = array_udiff($newFields, $formFields, function ($a, $b) {
-            return strcmp($a['key'], $b['key']);
-        });
-        foreach ($fieldsToAdd as $formField) {
+        // Fields
+        foreach ($newFields as $formField) {
             $field = $form->fields()->where('key', $formField['key'])->first();
 
             if (!$field) {
@@ -105,8 +101,8 @@ class FormController extends Controller
                     'key'   => $formField['key'],
                     'type'  => $formField['type'],
                     'meta'  => [
-                        'attributes' => isset($formField['attributes']) ? $formField['attributes'] : [],
-                        'options'    => isset($formField['options']) ? $formField['options'] : []
+                        'attributes' => $this->parseAttributes($formField),
+                        'options'    => $this->parseOptions($formField)
                     ],
                     'order' => $formField['order']
                 ]);
@@ -116,7 +112,7 @@ class FormController extends Controller
                 $field->update([
                     'meta'  => [
                         'attributes' => isset($formField['attributes']) ? $formField['attributes'] : [],
-                        'options'    => isset($formField['options']) ? $formField['options'] : []
+                        'options'    => $this->parseOptions($formField)
                     ],
                     'order' => $formField['order']
                 ]);
@@ -208,5 +204,31 @@ class FormController extends Controller
             'translations' => $translations,
             'order'        => $id + 1
         ];
+    }
+
+    /**
+     * @param $formField
+     * @return array
+     */
+    private function parseAttributes($formField)
+    {
+        $attributes = isset($formField['attributes']) ? $formField['attributes'] : [];
+
+        return $attributes;
+    }
+
+    /**
+     * @param $formField
+     * @return array
+     */
+    private function parseOptions($formField)
+    {
+        $options = isset($formField['options']) ? $formField['options'] : [];
+
+        if (!$options) {
+            return [];
+        }
+
+        return array_combine($options['value'], $options['text']);
     }
 }

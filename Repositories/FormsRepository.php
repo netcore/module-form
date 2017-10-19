@@ -8,6 +8,42 @@ use Modules\Form\Models\Form;
 class FormsRepository
 {
     /**
+     * @var array
+     */
+    private static $callables = [];
+
+    /**
+     * @param $formKey
+     * @param $callable
+     */
+    public static function addNewEvent($formKey, $callable)
+    {
+        self::$callables[$formKey] = $callable;
+    }
+
+    /**
+     * @param $request
+     */
+    public function storeEntries($request, Form $form)
+    {
+        $lastEntry = $form->entries()->latest()->first();
+        $batch = $lastEntry ? $lastEntry->batch + 1 : 1;
+
+        $entries = collect();
+        foreach ($form->fields as $field) {
+            $entries->push($form->entries()->create([
+                'form_field_id' => $field->id,
+                'value'         => $request->get($field->key, ''),
+                'batch'         => $batch
+            ]));
+        }
+        // Callback
+        if (isset(self::$callables[$form->key])) {
+            self::$callables[$form->key]($form->getEntry($entries));
+        }
+    }
+
+    /**
      * @param $text
      * @return string
      */
