@@ -106,6 +106,20 @@ class FormField extends Model
     }
 
     /**
+     * @return mixed
+     */
+    public function getValidationRules()
+    {
+        $validation = array_get($this->meta, 'validation', []);
+
+        if (!is_array($validation)) {
+            $validation = [];
+        }
+
+        return implode('|', $validation);
+    }
+
+    /**
      * @return string
      */
     private function getClass()

@@ -19,7 +19,9 @@ class FormController extends Controller
      */
     public function store(Request $request, Form $form)
     {
-        app('forms')->storeEntries($request, $form);
+        if (!app('forms')->storeEntries($request, $form)) {
+            return back();
+        }
 
         return back()->withSuccess('Successfully created');
     }

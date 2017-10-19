@@ -13,6 +13,14 @@ class FormsRepository
     private static $callables = [];
 
     /**
+     * FormsRepository constructor.
+     */
+    public function __construct()
+    {
+        $this->config = config('netcore.module-form');
+    }
+
+    /**
      * @param $formKey
      * @param $callable
      */
@@ -22,25 +30,42 @@ class FormsRepository
     }
 
     /**
-     * @param $request
+     * @param      $request
+     * @param Form $form
+     * @return bool
      */
     public function storeEntries($request, Form $form)
     {
+        $fields = $form->fields;
+
+        $rules = $fields->mapWithKeys(function ($field) {
+            return [$field->key => $field->getValidationRules()];
+        })->all();
+
+        $request->validate($rules);
+
+        if ($this->config['honeypot_enabled'] && !empty($request->get($this->config['honeypot_field_name']))) {
+            return false;
+        }
+
         $lastEntry = $form->entries()->latest()->first();
         $batch = $lastEntry ? $lastEntry->batch + 1 : 1;
 
         $entries = collect();
-        foreach ($form->fields as $field) {
+        foreach ($fields as $field) {
             $entries->push($form->entries()->create([
                 'form_field_id' => $field->id,
                 'value'         => $request->get($field->key, ''),
                 'batch'         => $batch
             ]));
         }
+
         // Callback
         if (isset(self::$callables[$form->key])) {
             self::$callables[$form->key]($form->getEntry($entries));
         }
+
+        return true;
     }
 
     /**
@@ -68,7 +93,8 @@ class FormsRepository
      */
     private function form(Form $form)
     {
-        $html = FormFacade::open(['route' => ['form::store', $form->id], 'method' => 'PUT', 'files' => true]);
+        $html = view('admin::_partials._messages');
+        $html .= FormFacade::open(['route' => ['form::store', $form->id], 'method' => 'PUT', 'files' => true]);
         $html .= $this->fields($form->fields);
         $html .= FormFacade::close();
 
@@ -82,6 +108,10 @@ class FormsRepository
     private function fields($fields)
     {
         $html = '';
+
+        if ($this->config['honeypot_enabled']) {
+            $html .= FormFacade::text($this->config['honeypot_field_name'], null, ['style' => 'display: none;']);
+        }
 
         foreach ($fields as $field) {
             $html .= '<div class="form-group">';

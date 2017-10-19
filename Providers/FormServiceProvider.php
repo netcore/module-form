@@ -49,7 +49,7 @@ class FormServiceProvider extends ServiceProvider
     protected function registerConfig()
     {
         $this->publishes([
-            __DIR__ . '/../Config/config.php' => config_path('form.php'),
+            __DIR__ . '/../Config/config.php' => config_path('netcore/module-form.php'),
         ], 'config');
         $this->mergeConfigFrom(__DIR__ . '/../Config/config.php', 'form');
     }

@@ -2273,6 +2273,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
 
@@ -2284,9 +2296,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             attributes: [],
-            options: []
+            options: [],
+            validation: this.data['meta'] ? this.data['meta']['validation'] : []
         };
     },
+
+    mounted: function mounted() {
+        this.setOptions();
+    },
+
 
     computed: {
         model: function model() {
@@ -2309,10 +2327,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     methods: {
         addOption: function addOption() {
-            this.options.push([]);
+            this.options.push({});
+        },
+        removeOption: function removeOption(option) {
+            Vue.delete(this.options, option);
         },
         remove: function remove(field) {
             this.$emit('remove-field', field);
+        },
+        setOptions: function setOptions() {
+            var options = this.data['meta'] ? this.data['meta']['options'] : [];
+            var tmpArray = [];
+
+            for (var key in options) {
+                if (options.hasOwnProperty(key)) {
+                    tmpArray.push({
+                        value: key,
+                        text: options[key]
+                    });
+                }
+            }
+
+            this.options = tmpArray;
         }
     }
 });
@@ -2519,37 +2555,6 @@ var render = function() {
               })
             ),
             _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "form-group" },
-              [
-                _c("label", [_vm._v("Attributes")]),
-                _vm._v(" "),
-                _c("select2", {
-                  attrs: {
-                    data: [
-                      { id: "required", text: "Required" },
-                      { id: "disabled", text: "Disabled" },
-                      { id: "min", text: "Min" },
-                      { id: "max", text: "Max" },
-                      { id: "class", text: "Class" }
-                    ],
-                    name: "fields[" + _vm.model.id + "][attributes][]",
-                    placeholder: "Please select",
-                    multiple: true
-                  },
-                  model: {
-                    value: _vm.attributes,
-                    callback: function($$v) {
-                      _vm.attributes = $$v
-                    },
-                    expression: "attributes"
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
             _vm.model.type == "select"
               ? _c(
                   "div",
@@ -2578,7 +2583,7 @@ var render = function() {
                     _vm._v(" "),
                     _c("br"),
                     _vm._v(" "),
-                    _vm._l(_vm.options, function(option) {
+                    _vm._l(_vm.options, function(option, key) {
                       return _c("div", { staticClass: "input-group" }, [
                         _c("input", {
                           staticClass: "form-control",
@@ -2586,7 +2591,8 @@ var render = function() {
                             type: "text",
                             name:
                               "fields[" + _vm.model.id + "][options][value][]"
-                          }
+                          },
+                          domProps: { value: option.value }
                         }),
                         _vm._v(" "),
                         _c("span", { staticClass: "input-group-addon" }, [
@@ -2599,14 +2605,87 @@ var render = function() {
                             type: "text",
                             name:
                               "fields[" + _vm.model.id + "][options][text][]"
-                          }
-                        })
+                          },
+                          domProps: { value: option.text }
+                        }),
+                        _vm._v(" "),
+                        _c("span", { staticClass: "input-group-addon" }, [
+                          _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-danger btn-xs",
+                              attrs: { type: "button" },
+                              on: {
+                                click: function($event) {
+                                  _vm.removeOption(key)
+                                }
+                              }
+                            },
+                            [_vm._v("Delete")]
+                          )
+                        ])
                       ])
                     })
                   ],
                   2
                 )
               : _vm._e(),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "form-group" },
+              [
+                _c("label", [_vm._v("Attributes")]),
+                _vm._v(" "),
+                _c("select2", {
+                  attrs: {
+                    data: [
+                      { id: "required", text: "Required" },
+                      { id: "disabled", text: "Disabled" }
+                    ],
+                    name: "fields[" + _vm.model.id + "][attributes][]",
+                    placeholder: "Please select",
+                    multiple: true
+                  },
+                  model: {
+                    value: _vm.attributes,
+                    callback: function($$v) {
+                      _vm.attributes = $$v
+                    },
+                    expression: "attributes"
+                  }
+                })
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "form-group" },
+              [
+                _c("label", [_vm._v("Validation rules")]),
+                _vm._v(" "),
+                _c("select2", {
+                  attrs: {
+                    data: [
+                      { id: "required", text: "Required" },
+                      { id: "email", text: "Email" }
+                    ],
+                    name: "fields[" + _vm.model.id + "][validation][]",
+                    placeholder: "Please select",
+                    multiple: true
+                  },
+                  model: {
+                    value: _vm.validation,
+                    callback: function($$v) {
+                      _vm.validation = $$v
+                    },
+                    expression: "validation"
+                  }
+                })
+              ],
+              1
+            ),
             _vm._v(" "),
             _c(
               "a",

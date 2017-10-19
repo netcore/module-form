@@ -53,7 +53,8 @@ class FormController extends Controller
                 'type'  => $formField['type'],
                 'meta'  => [
                     'attributes' => $this->parseAttributes($formField),
-                    'options'    => $this->parseOptions($formField)
+                    'options'    => $this->parseOptions($formField),
+                    'validation' => $this->parseValidationRules($formField)
                 ],
                 'order' => $order + 1
             ]);
@@ -102,7 +103,8 @@ class FormController extends Controller
                     'type'  => $formField['type'],
                     'meta'  => [
                         'attributes' => $this->parseAttributes($formField),
-                        'options'    => $this->parseOptions($formField)
+                        'options'    => $this->parseOptions($formField),
+                        'validation' => $this->parseValidationRules($formField)
                     ],
                     'order' => $formField['order']
                 ]);
@@ -111,8 +113,9 @@ class FormController extends Controller
             } else {
                 $field->update([
                     'meta'  => [
-                        'attributes' => isset($formField['attributes']) ? $formField['attributes'] : [],
-                        'options'    => $this->parseOptions($formField)
+                        'attributes' => $this->parseAttributes($formField),
+                        'options'    => $this->parseOptions($formField),
+                        'validation' => $this->parseValidationRules($formField)
                     ],
                     'order' => $formField['order']
                 ]);
@@ -202,7 +205,8 @@ class FormController extends Controller
             'type'         => $field['type'],
             'type_name'    => ucfirst($field['type']),
             'translations' => $translations,
-            'order'        => $id + 1
+            'order'        => $id + 1,
+            'meta'         => $field['meta']
         ];
     }
 
@@ -212,9 +216,7 @@ class FormController extends Controller
      */
     private function parseAttributes($formField)
     {
-        $attributes = isset($formField['attributes']) ? $formField['attributes'] : [];
-
-        return $attributes;
+        return isset($formField['attributes']) ? $formField['attributes'] : [];
     }
 
     /**
@@ -230,5 +232,14 @@ class FormController extends Controller
         }
 
         return array_combine($options['value'], $options['text']);
+    }
+
+    /**
+     * @param $formField
+     * @return string
+     */
+    private function parseValidationRules($formField)
+    {
+        return isset($formField['validation']) ? $formField['validation'] : [];
     }
 }
