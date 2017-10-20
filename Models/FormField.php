@@ -4,7 +4,7 @@ namespace Modules\Form\Models;
 
 use Dimsav\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Content\Traits\SyncTranslations;
+use Modules\Admin\Traits\SyncTranslations;
 use Modules\Form\Translations\FormFieldTranslation;
 
 class FormField extends Model
