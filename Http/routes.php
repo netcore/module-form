@@ -19,12 +19,18 @@ Route::group([
     Route::resource('form', 'FormController', [
         'except' => ['show'],
     ]);
-    Route::resource('form.entries', 'FormEntryController', [
-        'only' => ['index', 'destroy'],
+
+    Route::get('form/{form}/export', [
+        'as' => 'form.export',
+        'uses' => 'FormController@export'
     ]);
 
     Route::get('form/{form}/entries/pagination', [
         'as' => 'form.entries.pagination',
         'uses' => 'FormEntryController@pagination'
+    ]);
+
+    Route::resource('form.entries', 'FormEntryController', [
+        'only' => ['index', 'show', 'destroy'],
     ]);
 });

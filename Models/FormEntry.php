@@ -23,6 +23,11 @@ class FormEntry extends Model
     ];
 
     /**
+     * @var array
+     */
+    protected $with = ['form_field'];
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function form()

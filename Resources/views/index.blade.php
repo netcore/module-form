@@ -1,11 +1,16 @@
 @extends('admin::layouts.master')
 
 @section('content')
+    @include('admin::_partials._messages')
+
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-inverse">
                 <div class="panel-heading">
                     <div class="panel-heading-btn">
+                        <a href="{{ route('admin::form.export', 'all') }}" class="btn btn-xs btn-success">
+                            <i class="fa fa-file-excel-o"></i> Export all
+                        </a>
                         <a href="{{ route('admin::form.create') }}" class="btn btn-xs btn-success">
                             <i class="fa fa-plus"></i> Create
                         </a>
@@ -14,7 +19,7 @@
                 </div>
                 <div class="panel-body">
                     @if ($forms->count())
-                        <table class="table table-bordered">
+                        <table class="table table-bordered" id="datatable">
                             <thead>
                             <tr>
                                 <th>Name</th>
@@ -27,7 +32,7 @@
                                     <td>{{ $form->name }}</td>
                                     <td width="15%" class="text-center">
                                         <a href="{{ route('admin::form.entries.index', $form) }}" class="btn btn-xs btn-default">
-                                            <i class="fa fa-eye"></i> Entries ({{ count($form->getEntries()) }})
+                                            <i class="fa fa-eye"></i> Entries ({{ $form->entries()->count() }})
                                         </a>
                                         <a href="{{ route('admin::form.edit', $form) }}" class="btn btn-xs btn-warning">
                                             <i class="fa fa-edit"></i> Edit
@@ -48,4 +53,16 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        $(function () {
+            $('#datatable').DataTable({
+                responsive: true,
+
+                order: [[0, 'asc' ]]
+            })
+        });
+    </script>
 @endsection

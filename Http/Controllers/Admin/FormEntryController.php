@@ -15,7 +15,7 @@ class FormEntryController extends Controller
      */
     public function pagination(Form $form)
     {
-        $entries = $form->getEntries($limitValue = true);
+        $entries = $form->entries()->all($limitValue = 100);
 
         return datatables()->of($entries)->addColumn('actions', function ($entry) use ($form) {
             return view('form::entries.tds.actions', compact('form', 'entry'))->render();
@@ -25,11 +25,28 @@ class FormEntryController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param  Form $form
      * @return Response
      */
     public function index(Form $form)
     {
         return view('form::entries.index', compact('form'));
+    }
+
+    /**
+     * @param Form $form
+     * @param      $entry
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function show(Form $form, $entry)
+    {
+        $entry = $form->entries()->get($entry);
+
+        if (!$entry) {
+            return redirect()->route('admin::form.entries.index', $form)->withErrors('Entry not found');
+        }
+
+        return view('form::entries.show', compact('form', 'entry'));
     }
 
     /**
@@ -40,7 +57,7 @@ class FormEntryController extends Controller
      */
     public function destroy(Form $form, $batch)
     {
-        $form->entries()->where('batch', $batch)->delete();
+        $form->form_entries()->where('batch', $batch)->delete();
 
         if (request()->ajax()) {
             return response()->json([

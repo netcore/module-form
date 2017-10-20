@@ -2,9 +2,12 @@
 
 namespace Modules\Form\Http\Controllers\Admin;
 
+use Carbon\Carbon;
+use Excel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Maatwebsite\Excel\Writers\CellWriter;
 use Modules\Form\Http\Requests\Admin\FormsRequest;
 use Modules\Form\Models\Form;
 use Netcore\Translator\Helpers\TransHelper;
@@ -48,21 +51,12 @@ class FormController extends Controller
 
         // Fields
         foreach ($request->get('fields', []) as $order => $formField) {
-            $field = $form->fields()->create([
-                'key'   => $formField['key'],
-                'type'  => $formField['type'],
-                'meta'  => [
-                    'attributes' => $this->parseAttributes($formField),
-                    'options'    => $this->parseOptions($formField),
-                    'validation' => $this->parseValidationRules($formField)
-                ],
-                'order' => $order + 1
-            ]);
+            $field = $form->fields()->create($this->field($formField, $order, 'create'));
 
             $field->storeTranslations($formField['translations']);
         }
 
-        return back()->withSuccess('Successfully created');
+        return redirect()->route('admin::form.index')->withSuccess('Successfully created');
     }
 
     /**
@@ -98,28 +92,10 @@ class FormController extends Controller
             $field = $form->fields()->where('key', $formField['key'])->first();
 
             if (!$field) {
-                $field = $form->fields()->create([
-                    'key'   => $formField['key'],
-                    'type'  => $formField['type'],
-                    'meta'  => [
-                        'attributes' => $this->parseAttributes($formField),
-                        'options'    => $this->parseOptions($formField),
-                        'validation' => $this->parseValidationRules($formField)
-                    ],
-                    'order' => $formField['order']
-                ]);
-
+                $field = $form->fields()->create($this->field($formField, null, 'create'));
                 $field->storeTranslations($formField['translations']);
             } else {
-                $field->update([
-                    'meta'  => [
-                        'attributes' => $this->parseAttributes($formField),
-                        'options'    => $this->parseOptions($formField),
-                        'validation' => $this->parseValidationRules($formField)
-                    ],
-                    'order' => $formField['order']
-                ]);
-
+                $field->update($this->field($formField, null, 'update'));
                 $field->updateTranslations($formField['translations']);
             }
         }
@@ -161,6 +137,64 @@ class FormController extends Controller
     }
 
     /**
+     * @param string $form
+     * @return mixed
+     */
+    public function export($form = 'all')
+    {
+        if ($form == 'all') {
+            $forms = Form::all();
+        } else {
+            $forms = Form::find($form);
+        }
+
+        if (!$forms) {
+            return back()->withErrors('Form not found!');
+        }
+
+        $name = $form == 'all' ? 'All forms' : 'Form - ' . $forms->name;
+        $name .= '-' . Carbon::now()->format('d.m.Y-H:i');
+        Excel::create($name, function ($excel) use ($form, $forms) {
+            $excel->sheet('Forms', function ($sheet) use ($form, $forms) {
+
+                if ($form == 'all') {
+                    foreach ($forms as $key => $form) {
+                        $entries = $form->entries()->count();
+                        $row = $key == 0 ? 1 : $row + $entries;
+
+                        if ($key == 0 || $row == ($row + $entries) - 1) {
+                            $sheet->row($row, $form->entries()->getColumns());
+                            $sheet->row($row, function (CellWriter $row) {
+                                $row->setFontWeight(true);
+                                $row->setBackground('#cccccc');
+                            });
+                        }
+
+                        foreach ($form->entries()->all() as $key => $entry) {
+                            $row++;
+                            $sheet->row($row, $entry);
+                        }
+                    }
+                } else {
+                    $row = 2;
+
+                    $sheet->row(1, $forms->entries()->getColumns());
+                    $sheet->row(1, function (CellWriter $row) {
+                        $row->setFontWeight(true);
+                        $row->setBackground('#cccccc');
+                    });
+
+                    foreach ($forms->entries()->all() as $key => $entry) {
+                        $sheet->row($row, $entry);
+                        $row++;
+                    }
+                }
+            });
+
+        })->download('xls');
+    }
+
+    /**
      * @return array
      */
     private function getFields($data = null)
@@ -172,16 +206,16 @@ class FormController extends Controller
             $currentFields = $data->fields()->with('translations')->orderBy('order', 'ASC')->get()->toArray();
         }
 
-        $fields = collect(array_merge($oldFields, $currentFields))->map(function ($field, $id) {
-            return $this->mapField($id, $field);
-        })->all();
+        $fields = array_merge($oldFields, $currentFields);
 
         // Unique
         $fields = array_filter($fields, function ($value, $key) use ($fields) {
             return $key === array_search($value['key'], array_column($fields, 'key'));
         }, ARRAY_FILTER_USE_BOTH);
 
-        return $fields;
+        return collect($fields)->map(function ($field, $id) {
+            return $this->mapField($id, $field);
+        });
     }
 
     /**
@@ -206,7 +240,7 @@ class FormController extends Controller
             'type_name'    => ucfirst($field['type']),
             'translations' => $translations,
             'order'        => $id + 1,
-            'meta'         => $field['meta']
+            'meta'         => isset($field['meta']) ? $field['meta'] : []
         ];
     }
 
@@ -241,5 +275,28 @@ class FormController extends Controller
     private function parseValidationRules($formField)
     {
         return isset($formField['validation']) ? $formField['validation'] : [];
+    }
+
+    /**
+     * @param $formField
+     * @return array
+     */
+    private function field($formField, $order = null, $action = 'update'): array
+    {
+        $data = [
+            'meta'  => [
+                'attributes' => $this->parseAttributes($formField),
+                'options'    => $this->parseOptions($formField),
+                'validation' => $this->parseValidationRules($formField)
+            ],
+            'order' => $order ?: $formField['order']
+        ];
+
+        if ($action == 'create') {
+            $data['key'] = $formField['key'];
+            $data['type'] = $formField['type'];
+        }
+
+        return $data;
     }
 }

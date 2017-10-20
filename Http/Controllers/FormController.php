@@ -23,6 +23,6 @@ class FormController extends Controller
             return back();
         }
 
-        return back()->withSuccess('Successfully created');
+        return back()->withSuccess('Successfully submitted');
     }
 }

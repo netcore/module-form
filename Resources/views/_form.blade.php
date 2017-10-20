@@ -20,18 +20,23 @@
     </div>
 
     <div class="col-lg-6">
-        <div id="accordion" role="tablist" aria-multiselectable="true">
-            <draggable v-model="formFields" @update="updateOrder">
-                <form-field v-for="field in formFields" :data="field" :key="field.id" v-on:remove-field="removeField(field)" :languages="languages"></form-field>
-            </draggable>
+        <div v-if="formFields.length">
+            <div id="accordion" role="tablist" aria-multiselectable="true">
+                <draggable v-model="formFields" @update="updateOrder">
+                    <form-field v-for="field in formFields" :data="field" :key="field.id" v-on:remove-field="removeField(field)" :languages="languages"></form-field>
+                </draggable>
+            </div>
+        </div>
+        <div v-else>
+            <div class="alert alert-info">No fields added</div>
         </div>
     </div>
 </div>
 
 @section('scripts')
     <script>
-        var languages = '{{ json_encode($languages) }}';
-        var currentFields = '{{ json_encode(($fields ?: []), JSON_UNESCAPED_UNICODE) }}';
+        var languages = '{{ $languages->toJson() }}';
+        var currentFields = '{{ $fields->toJson() }}';
 
         languages = JSON.parse(languages.replace(/&quot;/g, '"'));
         currentFields = JSON.parse(currentFields.replace(/&quot;/g, '"'));

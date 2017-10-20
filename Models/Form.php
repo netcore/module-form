@@ -2,10 +2,10 @@
 
 namespace Modules\Form\Models;
 
-use function foo\func;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Form\Models\FormField;
 use Modules\Form\Models\FormEntry;
+use Modules\Form\PassThroughs\Form\GetEntries;
 
 class Form extends Model
 {
@@ -34,20 +34,37 @@ class Form extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function entries()
+    public function form_entries()
     {
         return $this->hasMany(FormEntry::class);
     }
 
     /**
-     * @param bool $limitValue
+     * @return GetEntries
+     */
+    public function entries()
+    {
+        return new GetEntries($this);
+    }
+
+    /**
      * @return array
      */
-    public function getEntries($limitValue = false)
+    public function getValidationRules()
     {
-        $entries = $this->entries->groupBy('batch')->map(function ($entry) {
-            return $entry->keyBy('form_field_id');
-        })->toArray();
+        $rules = [];
+
+        foreach ($this->fields as $field) {
+            if ($rule = $field->getValidationRules()) {
+                $rules[] = $rule;
+            }
+        }
+
+        return $rules;
+    }
+
+    public function entryData()
+    {
         $array = [];
 
         foreach ($entries as $i => $entry) {

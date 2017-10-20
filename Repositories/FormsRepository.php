@@ -36,33 +36,26 @@ class FormsRepository
      */
     public function storeEntries($request, Form $form)
     {
-        $fields = $form->fields;
-
-        $rules = $fields->mapWithKeys(function ($field) {
-            return [$field->key => $field->getValidationRules()];
-        })->all();
-
-        $request->validate($rules);
+        $request->validate($form->getValidationRules());
 
         if ($this->config['honeypot_enabled'] && !empty($request->get($this->config['honeypot_field_name']))) {
             return false;
         }
 
-        $lastEntry = $form->entries()->latest()->first();
+        $lastEntry = $form->form_entries()->latest()->first();
         $batch = $lastEntry ? $lastEntry->batch + 1 : 1;
 
-        $entries = collect();
-        foreach ($fields as $field) {
-            $entries->push($form->entries()->create([
+        foreach ($form->fields as $field) {
+            $form->form_entries()->create([
                 'form_field_id' => $field->id,
                 'value'         => $request->get($field->key, ''),
                 'batch'         => $batch
-            ]));
+            ]);
         }
 
         // Callback
         if (isset(self::$callables[$form->key])) {
-            self::$callables[$form->key]($form->getEntry($entries));
+            self::$callables[$form->key]($form->entries()->get($batch));
         }
 
         return true;
@@ -95,7 +88,7 @@ class FormsRepository
     {
         $html = view('admin::_partials._messages');
         $html .= FormFacade::open(['route' => ['form::store', $form->id], 'method' => 'PUT', 'files' => true]);
-        $html .= $this->fields($form->fields);
+        $html .= $this->fields($form->fields->sortBy('order'));
         $html .= FormFacade::close();
 
         return $html;

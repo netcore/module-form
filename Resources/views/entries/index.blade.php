@@ -1,10 +1,20 @@
 @extends('admin::layouts.master')
 
 @section('content')
+    @include('admin::_partials._messages')
+
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-inverse">
                 <div class="panel-heading">
+                    <div class="panel-heading-btn">
+                        <a href="{{ route('admin::form.export', $form->id) }}" class="btn btn-xs btn-success">
+                            <i class="fa fa-file-excel-o"></i> Export
+                        </a>
+                        <a href="{{ route('admin::form.index') }}" class="btn btn-xs btn-primary">
+                            <i class="fa fa-undo"></i> Back to list
+                        </a>
+                    </div>
                     <h4 class="panel-title">Form "{{ $form->name }}" entries</h4>
                 </div>
                 <div class="panel-body">
@@ -30,7 +40,6 @@
 @section('scripts')
     <script>
         $(function () {
-
             $('#datatable').DataTable({
                 responsive: true,
                 serverSide: true,
@@ -42,10 +51,9 @@
                     {data: '{{ $field->key }}', name: '{{ $field->key }}'},
                     @endforeach
                     {
-                        data: 'submitted_at',
-                        name: 'submitted_at',
+                        data: 'created_at',
+                        name: 'created_at',
                         searchable: false,
-                        sortable: false,
                         width: '10%',
                         className: 'text-center'
                     },
@@ -57,11 +65,10 @@
                         width: '10%',
                         className: 'text-center'
                     }
-                ]
+                ],
 
+                order: [[{{ $form->fields->count() }}, 'desc' ]]
             })
-
         });
-
     </script>
 @endsection
