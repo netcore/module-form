@@ -17,6 +17,7 @@ class FormFieldTranslation extends Model
      */
     protected $fillable = [
         'label',
+        'placeholder',
         'locale' // This is very important
     ];
 

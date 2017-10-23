@@ -88,17 +88,17 @@ class FormsRepository
     {
         $html = view('admin::_partials._messages');
         $html .= FormFacade::open(['route' => ['form::store', $form->id], 'method' => 'PUT', 'files' => true]);
-        $html .= $this->fields($form->fields->sortBy('order'));
+        $html .= $this->fields($form);
         $html .= FormFacade::close();
 
         return $html;
     }
 
     /**
-     * @param $fields
+     * @param Form $form
      * @return string
      */
-    private function fields($fields)
+    private function fields(Form $form)
     {
         $html = '';
 
@@ -106,9 +106,11 @@ class FormsRepository
             $html .= FormFacade::text($this->config['honeypot_field_name'], null, ['style' => 'display: none;']);
         }
 
-        foreach ($fields as $field) {
+        foreach ($form->fields->sortBy('order') as $field) {
             $html .= '<div class="form-group">';
-            $html .= FormFacade::label($field->key, $field->label);
+            if ($field->show_label) {
+                $html .= FormFacade::label($field->key, $field->label);
+            }
             $html .= $this->{$field->type}($field);
             $html .= '</div>';
         }

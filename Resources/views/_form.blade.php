@@ -10,7 +10,7 @@
 {!! Form::label('fields', 'Fields') !!}
 
 <div class="row">
-    <div class="col-lg-6">
+    <div class="col-lg-4">
         <ul class="fields">
             <li v-for="field in availableFields" @click="addField(field)" v-cloak>
                 @{{ field.name }}
@@ -19,7 +19,7 @@
         </ul>
     </div>
 
-    <div class="col-lg-6">
+    <div class="col-lg-8">
         <div v-if="formFields.length">
             <div id="accordion" role="tablist" aria-multiselectable="true">
                 <draggable v-model="formFields" @update="updateOrder">

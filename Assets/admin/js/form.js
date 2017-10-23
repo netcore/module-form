@@ -125,7 +125,7 @@ new Vue({
             $.each(this.languages, function (i, language) {
                 var isoCode = language.iso_code;
                 translations[isoCode] = {
-                    'label': 'Unnamed field'
+                    'name': 'Unnamed field'
                 };
             });
 
@@ -2285,6 +2285,24 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
 
@@ -2295,7 +2313,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     data: function data() {
         return {
-            attributes: [],
+            attributes: this.data['meta'] ? this.data['meta']['attributes'] : [],
             options: [],
             validation: this.data['meta'] ? this.data['meta']['validation'] : []
         };
@@ -2315,9 +2333,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 var isoCode = language.iso_code;
                 var langObj = modified.translations[isoCode];
                 var label = langObj ? langObj.label : '';
+                var name = langObj ? langObj.name : '';
+                var placeholder = langObj ? langObj.placeholder : '';
 
                 modified.translations[isoCode] = {
-                    'label': label
+                    'label': label,
+                    'name': name,
+                    'placeholder': placeholder
                 };
             });
 
@@ -2391,7 +2413,7 @@ var render = function() {
                     "\n                        " +
                       _vm._s(key.toUpperCase()) +
                       ": " +
-                      _vm._s(translation.label) +
+                      _vm._s(translation.name) +
                       "\n                    "
                   )
                 ])
@@ -2490,6 +2512,52 @@ var render = function() {
               })
             ]),
             _vm._v(" "),
+            _c("div", { staticClass: "form-group" }, [
+              _c("label", [_vm._v("Show label?")]),
+              _c("br"),
+              _vm._v(" "),
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.data.show_label,
+                    expression: "data.show_label"
+                  }
+                ],
+                attrs: {
+                  type: "checkbox",
+                  name: "fields[" + _vm.model.id + "][show_label]"
+                },
+                domProps: {
+                  checked: Array.isArray(_vm.data.show_label)
+                    ? _vm._i(_vm.data.show_label, null) > -1
+                    : _vm.data.show_label
+                },
+                on: {
+                  __c: function($event) {
+                    var $$a = _vm.data.show_label,
+                      $$el = $event.target,
+                      $$c = $$el.checked ? true : false
+                    if (Array.isArray($$a)) {
+                      var $$v = null,
+                        $$i = _vm._i($$a, $$v)
+                      if ($$el.checked) {
+                        $$i < 0 && (_vm.data.show_label = $$a.concat([$$v]))
+                      } else {
+                        $$i > -1 &&
+                          (_vm.data.show_label = $$a
+                            .slice(0, $$i)
+                            .concat($$a.slice($$i + 1)))
+                      }
+                    } else {
+                      _vm.data.show_label = $$c
+                    }
+                  }
+                }
+              })
+            ]),
+            _vm._v(" "),
             _c(
               "div",
               { staticClass: "row" },
@@ -2516,10 +2584,10 @@ var render = function() {
                             name: "model",
                             rawName: "v-model",
                             value:
-                              _vm.data.translations[String(language.iso_code)]
+                              _vm.model.translations[String(language.iso_code)]
                                 .label,
                             expression:
-                              "data.translations[String(language.iso_code)].label"
+                              "model.translations[String(language.iso_code)].label"
                           }
                         ],
                         staticClass: "form-control",
@@ -2534,7 +2602,7 @@ var render = function() {
                         },
                         domProps: {
                           value:
-                            _vm.data.translations[String(language.iso_code)]
+                            _vm.model.translations[String(language.iso_code)]
                               .label
                         },
                         on: {
@@ -2542,9 +2610,59 @@ var render = function() {
                             if ($event.target.composing) {
                               return
                             }
-                            _vm.data.translations[
+                            _vm.model.translations[
                               String(language.iso_code)
                             ].label =
+                              $event.target.value
+                          }
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group" }, [
+                      _c("label", {
+                        domProps: {
+                          textContent: _vm._s(
+                            "Placeholder " + language.iso_code.toUpperCase()
+                          )
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value:
+                              _vm.model.translations[String(language.iso_code)]
+                                .placeholder,
+                            expression:
+                              "model.translations[String(language.iso_code)].placeholder"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: {
+                          name:
+                            "fields[" +
+                            _vm.model.id +
+                            "][translations][" +
+                            language.iso_code +
+                            "][placeholder]",
+                          placeholder: "For example, Enter phone number"
+                        },
+                        domProps: {
+                          value:
+                            _vm.model.translations[String(language.iso_code)]
+                              .placeholder
+                        },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.model.translations[
+                              String(language.iso_code)
+                            ].placeholder =
                               $event.target.value
                           }
                         }

@@ -50,7 +50,7 @@ new Vue({
             $.each(this.languages, function (i, language) {
                 var isoCode = language.iso_code;
                 translations[isoCode] = {
-                    'label': 'Unnamed field'
+                    'name': 'Unnamed field'
                 }
             });
 

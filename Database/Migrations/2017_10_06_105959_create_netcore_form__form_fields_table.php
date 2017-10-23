@@ -22,6 +22,7 @@ class CreateNetcoreFormFormFieldsTable extends Migration
             $table->string('key');
             $table->string('type');
             $table->text('meta')->nullable();
+            $table->boolean('show_label')->default(1);
             $table->smallInteger('order');
 
             $table->timestamps();
@@ -35,6 +36,7 @@ class CreateNetcoreFormFormFieldsTable extends Migration
 
             $table->string('locale')->index();
             $table->string('label');
+            $table->string('placeholder')->nullable();
         });
     }
 

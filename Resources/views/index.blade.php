@@ -64,7 +64,22 @@
             $('#datatable').DataTable({
                 responsive: true,
 
-                order: [[0, 'asc' ]]
+                columns: [
+                    {
+                        data: 'name',
+                        name: 'name'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        searchable: false,
+                        sortable: false,
+                        width: '10%',
+                        className: 'text-center'
+                    }
+                ],
+
+                order: [[0, 'asc']]
             })
         });
     </script>

@@ -233,7 +233,9 @@ class FormController extends Controller
 
         foreach ($languages as $key => $language) {
             $translations[$language->iso_code] = [
-                'label' => isset($field['translations'][$language->iso_code]) ? $field['translations'][$language->iso_code]['label'] : (isset($field['translations'][$key]['label']) ? $field['translations'][$key]['label'] : '(Not specified)')
+                'name'        => isset($field['translations'][$language->iso_code]) ? $field['translations'][$language->iso_code]['label'] : (isset($field['translations'][$key]['label']) ? $field['translations'][$key]['label'] : '(Not specified)'),
+                'label'       => isset($field['translations'][$language->iso_code]) ? $field['translations'][$language->iso_code]['label'] : (isset($field['translations'][$key]['label']) ? $field['translations'][$key]['label'] : ''),
+                'placeholder' => isset($field['translations'][$language->iso_code]) ? $field['translations'][$language->iso_code]['placeholder'] : (isset($field['translations'][$key]['placeholder']) ? $field['translations'][$key]['placeholder'] : '')
             ];
         }
 
@@ -244,41 +246,28 @@ class FormController extends Controller
             'type_name'    => ucfirst($field['type']),
             'translations' => $translations,
             'order'        => $id + 1,
-            'meta'         => isset($field['meta']) ? $field['meta'] : []
+            'meta'         => $this->parseData($field, 'meta')
         ];
     }
 
     /**
      * @param $formField
+     * @param $type
      * @return array
      */
-    private function parseAttributes($formField)
+    private function parseData($formField, $type)
     {
-        return isset($formField['attributes']) ? $formField['attributes'] : [];
-    }
+        $data = isset($formField[$type]) ? $formField[$type] : [];
 
-    /**
-     * @param $formField
-     * @return array
-     */
-    private function parseOptions($formField)
-    {
-        $options = isset($formField['options']) ? $formField['options'] : [];
+        if ($type != 'options') {
+            return $data;
+        }
 
-        if (!$options) {
+        if (!$data) {
             return [];
         }
 
-        return array_combine($options['value'], $options['text']);
-    }
-
-    /**
-     * @param $formField
-     * @return string
-     */
-    private function parseValidationRules($formField)
-    {
-        return isset($formField['validation']) ? $formField['validation'] : [];
+        return array_combine($data['value'], $data['text']);
     }
 
     /**
@@ -288,12 +277,13 @@ class FormController extends Controller
     private function field($formField, $order = null, $action = 'update'): array
     {
         $data = [
-            'meta'  => [
-                'attributes' => $this->parseAttributes($formField),
-                'options'    => $this->parseOptions($formField),
-                'validation' => $this->parseValidationRules($formField)
+            'meta'       => [
+                'attributes' => $this->parseData($formField, 'attributes'),
+                'options'    => $this->parseData($formField, 'options'),
+                'validation' => $this->parseData($formField, 'validation')
             ],
-            'order' => $order ?: $formField['order']
+            'order'      => $order ?: $formField['order'],
+            'show_label' => isset($formField['show_label']) ? 1 : 0
         ];
 
         if ($action == 'create') {

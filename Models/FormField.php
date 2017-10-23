@@ -23,7 +23,8 @@ class FormField extends Model
         'key',
         'type',
         'meta',
-        'order'
+        'order',
+        'show_label'
     ];
 
     /**
@@ -42,7 +43,8 @@ class FormField extends Model
      * @var array
      */
     public $translatedAttributes = [
-        'label'
+        'label',
+        'placeholder'
     ];
 
     /**
@@ -79,6 +81,10 @@ class FormField extends Model
 
         if (!isset($attributes['class'])) {
             $attributes['class'] = $this->getClass();
+        }
+
+        if (!isset($attributes['placeholder'])) {
+            $attributes['placeholder'] = $this->placeholder;
         }
 
         return $attributes;

@@ -3,6 +3,7 @@
 namespace Modules\Form\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Netcore\Translator\Helpers\TransHelper;
 
 class FormsRequest extends FormRequest
 {
@@ -23,16 +24,32 @@ class FormsRequest extends FormRequest
      */
     public function rules()
     {
-        //$form = $this->form;
-        //$uniqueRule = 'unique:netcore_form__form_fields' . ($form ? ',form_id,' . $form->id . ',id' : '');
-
-        return [
+        $rules = [
             'name'         => 'required',
             'fields'       => 'required',
-            'fields.*.key' => [
-                'required',
-                //$uniqueRule
-            ]
+            'fields.*.key' => 'required'
         ];
+
+        foreach (TransHelper::getAllLanguages() as $language) {
+            $rules['fields.*.translations.' . $language->iso_code . '.label'] = 'required';
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Get the validation messages
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        $messages = [];
+
+        foreach (TransHelper::getAllLanguages() as $language) {
+            $messages['fields.*.translations.' . $language->iso_code . '.label.required'] = 'Label (' . strtoupper($language->iso_code) . ') is required';
+        }
+
+        return $messages;
     }
 }
