@@ -20,13 +20,13 @@ Route::group([
         'except' => ['show'],
     ]);
 
-    Route::get('form/{form}/export', [
-        'as' => 'form.export',
+    Route::get('form/{form}/export/{type?}', [
+        'as'   => 'form.export',
         'uses' => 'FormController@export'
     ]);
 
     Route::get('form/{form}/entries/pagination', [
-        'as' => 'form.entries.pagination',
+        'as'   => 'form.entries.pagination',
         'uses' => 'FormEntryController@pagination'
     ]);
 

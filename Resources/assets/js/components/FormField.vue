@@ -74,7 +74,7 @@
                     <div class="form-group">
                         <label>Validation rules</label>
                         <select2
-                                :data="[{id: 'required', 'text': 'Required'}, {id: 'email', 'text': 'Email'}]"
+                                :data="[{id: 'accepted', 'text': 'Accepted'}, {id: 'email', 'text': 'Email'}, {id: 'file', 'text': 'File'}, {id: 'image', 'text': 'Image'}, {id: 'required', 'text': 'Required'}]"
                                 :name="'fields['+model.id+'][validation][]'"
                                 :placeholder="'Please select'"
                                 :multiple="true"

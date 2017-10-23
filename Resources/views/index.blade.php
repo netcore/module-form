@@ -9,7 +9,10 @@
                 <div class="panel-heading">
                     <div class="panel-heading-btn">
                         <a href="{{ route('admin::form.export', 'all') }}" class="btn btn-xs btn-success">
-                            <i class="fa fa-file-excel-o"></i> Export all
+                            <i class="fa fa-file-excel-o"></i> Export all (XLS)
+                        </a>
+                        <a href="{{ route('admin::form.export', ['all', 'csv']) }}" class="btn btn-xs btn-success">
+                            <i class="fa fa-file-o"></i> Export all (CSV)
                         </a>
                         <a href="{{ route('admin::form.create') }}" class="btn btn-xs btn-success">
                             <i class="fa fa-plus"></i> Create

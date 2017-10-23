@@ -2668,8 +2668,11 @@ var render = function() {
                 _c("select2", {
                   attrs: {
                     data: [
-                      { id: "required", text: "Required" },
-                      { id: "email", text: "Email" }
+                      { id: "accepted", text: "Accepted" },
+                      { id: "email", text: "Email" },
+                      { id: "file", text: "File" },
+                      { id: "image", text: "Image" },
+                      { id: "required", text: "Required" }
                     ],
                     name: "fields[" + _vm.model.id + "][validation][]",
                     placeholder: "Please select",

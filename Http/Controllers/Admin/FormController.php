@@ -140,7 +140,7 @@ class FormController extends Controller
      * @param string $form
      * @return mixed
      */
-    public function export($form = 'all')
+    public function export($form = 'all', $type = 'xlsx')
     {
         if ($form == 'all') {
             $forms = Form::all();
@@ -150,6 +150,10 @@ class FormController extends Controller
 
         if (!$forms) {
             return back()->withErrors('Form not found!');
+        }
+
+        if (!in_array($type, ['xlsx', 'csv'])) {
+            $type = 'xlsx';
         }
 
         $name = $form == 'all' ? 'All forms' : 'Form - ' . $forms->name;
@@ -191,7 +195,7 @@ class FormController extends Controller
                 }
             });
 
-        })->download('xls');
+        })->download($type);
     }
 
     /**
