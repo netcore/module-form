@@ -56,7 +56,7 @@ class Form extends Model
 
         foreach ($this->fields as $field) {
             if ($rule = $field->getValidationRules()) {
-                $rules[] = $rule;
+                $rules[$field->key] = $rule;
             }
         }
 

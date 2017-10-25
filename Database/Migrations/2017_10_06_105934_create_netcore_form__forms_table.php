@@ -18,6 +18,7 @@ class CreateNetcoreFormFormsTable extends Migration
 
             $table->string('key')->index()->nullable();
             $table->string('name');
+            $table->string('template')->nullable();
 
             $table->timestamps();
         });

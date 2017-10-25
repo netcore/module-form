@@ -68,9 +68,9 @@ class FormsRepository
     public function replace($text)
     {
         return preg_replace_callback('~\[form=(.*?)\]~s', function ($match) {
-            $formId = isset($match[1]) ? $match[1] : null;
+            $form = isset($match[1]) ? $match[1] : null;
 
-            $form = Form::find($formId);
+            $form = Form::where('id', $form)->orWhere('key', $form)->first();
 
             if (!$form) {
                 return '';
@@ -81,11 +81,33 @@ class FormsRepository
     }
 
     /**
+     * @param $form
+     * @return string
+     */
+    public function render($form)
+    {
+        $form = Form::where('id', $form)->orWhere('key', $form)->first();
+
+        if (!$form) {
+            return '';
+        }
+
+        return $this->form($form);
+    }
+
+    /**
      * @param Form $form
      * @return string
      */
     private function form(Form $form)
     {
+        if ($form->template) {
+            return view($this->config['templates_path'] . $form->template, [
+                'url'    => route('form::store', $form),
+                'fields' => $form->fields
+            ]);
+        }
+
         $html = view('admin::_partials._messages');
         $html .= FormFacade::open(['route' => ['form::store', $form->id], 'method' => 'PUT', 'files' => true]);
         $html .= $this->fields($form);
