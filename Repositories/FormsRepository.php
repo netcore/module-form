@@ -101,8 +101,10 @@ class FormsRepository
      */
     private function form(Form $form)
     {
-        if ($form->template) {
-            return view($this->config['templates_path'] . $form->template, [
+        $template = $form->template ? $this->config['templates_path'] . $form->template : $this->config['templates_path'] . $form->key;
+
+        if ($template && view()->exists($template)) {
+            return view($template, [
                 'url'    => route('form::store', $form),
                 'fields' => $form->fields
             ]);
