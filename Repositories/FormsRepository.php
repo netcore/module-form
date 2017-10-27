@@ -86,7 +86,13 @@ class FormsRepository
      */
     public function render($form)
     {
-        $form = Form::where('id', $form)->orWhere('key', $form)->first();
+        // $form can be string or integer. Postgresql will not allow us to search for string in an integer column (ID)
+        // So, if it is string, look only in "key" column
+        if(is_numeric($form)) {
+            $form = Form::where('id', $form)->orWhere('key', $form)->first();
+        } else {
+            $form = Form::where('key', $form)->first();
+        }
 
         if (!$form) {
             return '';
