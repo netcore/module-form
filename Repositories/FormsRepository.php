@@ -70,7 +70,13 @@ class FormsRepository
         return preg_replace_callback('~\[form=(.*?)\]~s', function ($match) {
             $form = isset($match[1]) ? $match[1] : null;
 
-            $form = Form::where('id', $form)->orWhere('key', $form)->first();
+            // $form can be string or integer. Postgresql will not allow us to search for string in an integer column (ID)
+            // So, if it is string, look only in "key" column
+            if (is_numeric($form)) {
+                $form = Form::find($form);
+            } else {
+                $form = Form::where('key', $form)->first();
+            }
 
             if (!$form) {
                 return '';
@@ -88,8 +94,8 @@ class FormsRepository
     {
         // $form can be string or integer. Postgresql will not allow us to search for string in an integer column (ID)
         // So, if it is string, look only in "key" column
-        if(is_numeric($form)) {
-            $form = Form::where('id', $form)->orWhere('key', $form)->first();
+        if (is_numeric($form)) {
+            $form = Form::find($form);
         } else {
             $form = Form::where('key', $form)->first();
         }
