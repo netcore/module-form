@@ -122,7 +122,7 @@ class FormField extends Model
             $validation = [];
         }
 
-        return implode('|', $validation);
+        return $validation;
     }
 
     /**

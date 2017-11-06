@@ -39,8 +39,7 @@
                     </div>
 
                     <div class="row">
-                        <div :class="'col-md-' + (12 / languages.length)" class="col-xs-12"
-                             v-for="language in languages">
+                        <div :class="'col-md-' + Math.round(12 / languages.length)" v-for="language in languages">
                             <div class="form-group">
                                 <label v-text="'Label ' + language.iso_code.toUpperCase()"></label>
                                 <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][label]'"
@@ -92,7 +91,7 @@
                     <div class="form-group">
                         <label>Validation rules</label>
                         <select2
-                                :data="[{id: 'accepted', 'text': 'Accepted'}, {id: 'email', 'text': 'Email'}, {id: 'file', 'text': 'File'}, {id: 'image', 'text': 'Image'}, {id: 'required', 'text': 'Required'}]"
+                                :data="[{id: 'accepted', 'text': 'Accepted'}, {id: 'email', 'text': 'Email'}, {id: 'file', 'text': 'File'}, {id: 'image', 'text': 'Image'}, {id: 'required', 'text': 'Required'}, {id: 'unique', 'text': 'Unique'}]"
                                 :name="'fields['+model.id+'][validation][]'"
                                 :placeholder="'Please select'"
                                 :multiple="true"
