@@ -31,7 +31,7 @@ class FormUnique implements Rule
             return true;
         }
 
-        $exists = $this->form->form_entries->where('form_id', 1)->where('form_field_id', $field->id)->where('value', $value)->count();
+        $exists = $this->form->form_entries->where('form_field_id', $field->id)->where('value', $value)->count();
         if (!$exists) {
             return true;
         }
