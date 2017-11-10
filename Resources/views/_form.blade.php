@@ -1,5 +1,5 @@
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('assets/form/admin/css/form.css') }}">
+    <link rel="stylesheet" href="{{ versionedAsset('assets/form/admin/css/form.css') }}">
 @endsection
 
 <div class="form-group no-margin-hr">
@@ -41,5 +41,5 @@
         languages = JSON.parse(languages.replace(/&quot;/g, '"'));
         currentFields = JSON.parse(currentFields.replace(/&quot;/g, '"'));
     </script>
-    <script src="{{ asset('assets/form/admin/js/form.js') }}"></script>
+    <script src="{{ versionedAsset('assets/form/admin/js/forms_form.js') }}"></script>
 @endsection

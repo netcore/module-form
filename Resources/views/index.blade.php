@@ -21,12 +21,12 @@
                     <h4 class="panel-title">Forms</h4>
                 </div>
                 <div class="panel-body">
-                    @if ($forms->count())
-                        <table class="table table-bordered" id="datatable">
+                    <div class="table-primary">
+                        <table class="table table-bordered datatable">
                             <thead>
                             <tr>
                                 <th>Name</th>
-                                <th class="text-center">Actions</th>
+                                <th width="15%" class="text-center">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -34,10 +34,11 @@
                                 <tr>
                                     <td>{{ $form->name }}</td>
                                     <td width="15%" class="text-center">
-                                        <a href="{{ route('admin::form.entries.index', $form) }}" class="btn btn-xs btn-default">
+                                        <a href="{{ route('admin::form.entries.index', $form) }}"
+                                           class="btn btn-xs btn-default">
                                             <i class="fa fa-eye"></i> Entries ({{ $form->entries()->count() }})
                                         </a>
-                                        <a href="{{ route('admin::form.edit', $form) }}" class="btn btn-xs btn-warning">
+                                        <a href="{{ route('admin::form.edit', $form) }}" class="btn btn-xs btn-primary">
                                             <i class="fa fa-edit"></i> Edit
                                         </a>
                                         <a href="{{ route('admin::form.destroy', $form) }}"
@@ -49,9 +50,7 @@
                             @endforeach
                             </tbody>
                         </table>
-                    @else
-                        <div class="alert alert-info">No forms!</div>
-                    @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -59,28 +58,5 @@
 @endsection
 
 @section('scripts')
-    <script>
-        $(function () {
-            $('#datatable').DataTable({
-                responsive: true,
-
-                columns: [
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        searchable: false,
-                        sortable: false,
-                        width: '10%',
-                        className: 'text-center'
-                    }
-                ],
-
-                order: [[0, 'asc']]
-            })
-        });
-    </script>
+    <script src="{{ versionedAsset('assets/form/admin/js/forms_index.js') }}" type="text/javascript"></script>
 @endsection
