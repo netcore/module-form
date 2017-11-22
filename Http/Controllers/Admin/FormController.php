@@ -47,7 +47,8 @@ class FormController extends Controller
      */
     public function store(FormsRequest $request)
     {
-        $form = Form::create($request->only(['name']));
+        $form = Form::create([]);
+        $form->storeTranslations($request->get('translations', []));
 
         // Fields
         foreach ($request->get('fields', []) as $order => $formField) {
@@ -82,7 +83,7 @@ class FormController extends Controller
      */
     public function update(FormsRequest $request, Form $form)
     {
-        $form->update($request->only(['name']));
+        $form->updateTranslations($request->get('translations', []));
 
         $formFields = $form->fields->toArray();
         $newFields = $request->get('fields', []);

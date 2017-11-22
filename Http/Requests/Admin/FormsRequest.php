@@ -25,12 +25,12 @@ class FormsRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'name'         => 'required',
             'fields'       => 'required',
             'fields.*.key' => 'required'
         ];
 
         foreach (TransHelper::getAllLanguages() as $language) {
+            $rules['translations.' . $language->iso_code . '.name'] = 'required';
             $rules['fields.*.translations.' . $language->iso_code . '.label'] = 'required';
         }
 
@@ -44,10 +44,13 @@ class FormsRequest extends FormRequest
      */
     public function messages()
     {
-        $messages = [];
+        $messages = [
+            'fields.required' => 'Fields are required.'
+        ];
 
         foreach (TransHelper::getAllLanguages() as $language) {
-            $messages['fields.*.translations.' . $language->iso_code . '.label.required'] = 'Label (' . strtoupper($language->iso_code) . ') is required';
+            $messages['translations.' . $language->iso_code . '.name.required'] = 'Name (' . strtoupper($language->iso_code) . ') is required.';
+            $messages['fields.*.translations.' . $language->iso_code . '.label.required'] = 'Label (' . strtoupper($language->iso_code) . ') is required.';
         }
 
         return $messages;

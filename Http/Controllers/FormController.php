@@ -25,10 +25,10 @@ class FormController extends Controller
 
         if ($request->ajax() || $request->expectsJson()) {
             return response()->json([
-                'message' => 'Successfully submitted'
+                'message' => $form->success_message ?: 'Successfully submitted'
             ]);
         }
 
-        return back()->withSuccess('Successfully submitted');
+        return back()->withSuccess($form->success_message ?: 'Successfully submitted');
     }
 }

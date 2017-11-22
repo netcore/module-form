@@ -32,7 +32,11 @@
                             <tbody>
                             @foreach ($forms as $form)
                                 <tr>
-                                    <td>{{ $form->name }}</td>
+                                    <td>
+                                        @foreach(\Netcore\Translator\Helpers\TransHelper::getAllLanguages() as $language)
+                                            <b>{{ strtoupper($language->iso_code) }}:</b> {{ trans_model($form, $language, 'name') }}<br/>
+                                        @endforeach
+                                    </td>
                                     <td width="15%" class="text-center">
                                         <a href="{{ route('admin::form.entries.index', $form) }}"
                                            class="btn btn-xs btn-default">
