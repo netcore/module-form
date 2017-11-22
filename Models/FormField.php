@@ -79,10 +79,6 @@ class FormField extends Model
             $attributes = [];
         }
 
-        if (!isset($attributes['class'])) {
-            $attributes['class'] = $this->getClass();
-        }
-
         if (!isset($attributes['placeholder'])) {
             $attributes['placeholder'] = $this->placeholder;
         }

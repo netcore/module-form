@@ -46,9 +46,26 @@ class FormsRepository
         $batch = $lastEntry ? $lastEntry->batch + 1 : 1;
 
         foreach ($form->fields as $field) {
+            if ($field->type == 'file') {
+                $fileName = '';
+                $file = $request->file($field->key);
+                if ($file) {
+                    $fileName = md5($form->id . $field->key . time()) . '.' . $file->getClientOriginalExtension();
+
+                    $path = public_path($this->config['uploads_path']);
+                    if (!\File::exists($path)) {
+                        \File::makeDirectory($path, 0775, true);
+                    }
+
+                    $file->move($path, $fileName);
+                }
+
+                $request->{$field->key} = $fileName;
+            }
+
             $form->form_entries()->create([
                 'form_field_id' => $field->id,
-                'value'         => $request->get($field->key, ''),
+                'value'         => ($field->type !== 'file') ? $request->get($field->key, '') : $fileName,
                 'batch'         => $batch
             ]);
         }

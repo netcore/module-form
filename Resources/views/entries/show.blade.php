@@ -18,7 +18,13 @@
                         @foreach ($form->fields as $field)
                             <tr>
                                 <td width="20%">{{ $field->label }}:</td>
-                                <td>{{ array_get($entry, $field->key, '') }}</td>
+                                <td>
+                                    @if ($field->type === 'file')
+                                        <a href="{{ asset(config('netcore.module-form.uploads_path') . array_get($entry, $field->key, '')) }}">{{ array_get($entry, $field->key, '') }}</a>
+                                    @else
+                                        {{ array_get($entry, $field->key, '') }}
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                         </tbody>

@@ -4,7 +4,7 @@
             <div class="panel-heading" role="tab" :id="'heading-' + model.id">
                 <h4 class="panel-title">
                     <div class="pull-left">
-                        <i class="fa fa-sort"></i>
+                        <i class="fa fa-arrows"></i>
                     </div>
                     <a role="button" data-toggle="collapse" data-parent="#accordion" :href="'#collapse-' + model.id"
                        aria-expanded="true" :aria-controls="'collapse-' + model.id">
@@ -39,20 +39,41 @@
                     </div>
 
                     <div class="row">
-                        <div :class="'col-md-' + Math.round(12 / languages.length)" v-for="language in languages">
-                            <div class="form-group">
-                                <label v-text="'Label ' + language.iso_code.toUpperCase()"></label>
-                                <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][label]'"
-                                       v-model="model.translations[String(language.iso_code)].label"
-                                       class="form-control"
-                                       placeholder="For example, Phone number"/>
-                            </div>
-                            <div class="form-group">
-                                <label v-text="'Placeholder ' + language.iso_code.toUpperCase()"></label>
-                                <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][placeholder]'"
-                                       v-model="model.translations[String(language.iso_code)].placeholder"
-                                       class="form-control"
-                                       placeholder="For example, Enter phone number"/>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-6">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li
+                                        v-for="(language, key) in languages"
+                                        role="presentation"
+                                        :class="{active: key == 0}"
+                                >
+                                    <a
+                                            :href="'#'+ language.iso_code"
+                                            :aria-controls="language.iso_code"
+                                            role="tab"
+                                            data-toggle="tab"
+                                    >
+                                        {{ language.title_localized }}
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div v-for="(language, key) in languages" role="tabpanel" class="tab-pane"
+                                     :class="{active: key == 0}" :id="language.iso_code">
+                                    <div class="form-group">
+                                        <label v-text="'Label ' + language.iso_code.toUpperCase()"></label>
+                                        <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][label]'"
+                                               v-model="model.translations[String(language.iso_code)].label"
+                                               class="form-control"
+                                               placeholder="For example, Phone number"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label v-text="'Placeholder ' + language.iso_code.toUpperCase()"></label>
+                                        <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][placeholder]'"
+                                               v-model="model.translations[String(language.iso_code)].placeholder"
+                                               class="form-control"
+                                               placeholder="For example, Enter phone number"/>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -91,7 +112,7 @@
                     <div class="form-group">
                         <label>Validation rules</label>
                         <select2
-                                :data="[{id: 'accepted', 'text': 'Accepted'}, {id: 'email', 'text': 'Email'}, {id: 'file', 'text': 'File'}, {id: 'image', 'text': 'Image'}, {id: 'required', 'text': 'Required'}, {id: 'unique', 'text': 'Unique'}]"
+                                :data="validationRules"
                                 :name="'fields['+model.id+'][validation][]'"
                                 :placeholder="'Please select'"
                                 :multiple="true"
@@ -118,6 +139,14 @@
 
         data: function () {
             return {
+                validationRules: [
+                    {id: 'accepted', 'text': 'Accepted'},
+                    {id: 'email', 'text': 'Email'},
+                    {id: 'file', 'text': 'File'},
+                    {id: 'image', 'text': 'Image'},
+                    {id: 'required', 'text': 'Required'},
+                    {id: 'unique', 'text': 'Unique'}
+                ],
                 attributes: this.data['meta'] ? this.data['meta']['attributes'] : [],
                 options: [],
                 validation: this.data['meta'] ? this.data['meta']['validation'] : []
