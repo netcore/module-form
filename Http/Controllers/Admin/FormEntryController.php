@@ -46,7 +46,9 @@ class FormEntryController extends Controller
             return redirect()->route('admin::form.entries.index', $form)->withErrors('Entry not found');
         }
 
-        return view('form::entries.show', compact('form', 'entry'));
+        $entryLog = $form->entry_logs()->where('entry_id', $entry)->first();
+
+        return view('form::entries.show', compact('form', 'entry', 'entryLog'));
     }
 
     /**

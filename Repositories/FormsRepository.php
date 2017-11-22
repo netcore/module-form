@@ -75,6 +75,13 @@ class FormsRepository
             self::$callables[$form->key]($form->entries()->get($batch));
         }
 
+        // Log
+        $form->entry_logs()->create([
+            'entry_id'   => $batch,
+            'ip'         => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+
         return true;
     }
 
