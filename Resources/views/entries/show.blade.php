@@ -13,16 +13,33 @@
                     <h4 class="panel-title">View entry</h4>
                 </div>
                 <div class="panel-body">
-                    <table class="table table-bordered">
-                        <tbody>
-                        @foreach ($form->fields as $field)
+                    <div class="table-primary">
+                        <table class="table table-bordered">
+                            <thead>
                             <tr>
-                                <td width="20%">{{ $field->label }}:</td>
-                                <td>{{ array_get($entry, $field->key, '') }}</td>
+                                <th>Field</th>
+                                <th>Value</th>
                             </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            @foreach ($form->fields as $field)
+                                <tr>
+                                    <td width="20%">{{ $field->label }}:</td>
+                                    <td>
+                                        @if ($field->type === 'file')
+                                            <a href="{{ asset(config('netcore.module-form.uploads_path') . array_get($entry, $field->key, '')) }}">{{ array_get($entry, $field->key, '') }}</a>
+                                        @else
+                                            {{ array_get($entry, $field->key, '') }}
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <b>Additional information:</b><br/>
+                    IP: {{ $entryLog ? $entryLog->ip : '' }}<br/>
+                    User Agent: {{ $entryLog ? $entryLog->user_agent : '' }}<br/>
                 </div>
             </div>
         </div>

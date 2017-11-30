@@ -3,6 +3,8 @@
 namespace Modules\Form\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class FormEntry extends Model
 {
@@ -27,10 +29,12 @@ class FormEntry extends Model
      */
     protected $with = ['form_field'];
 
+    /* ---------------- Relations -------------------- */
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function form()
+    public function form(): BelongsTo
     {
         return $this->belongsTo(Form::class);
     }
@@ -38,9 +42,17 @@ class FormEntry extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function form_field()
+    public function form_field(): BelongsTo
     {
         return $this->belongsTo(FormField::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function log(): HasOne
+    {
+        return $this->hasOne(FormEntryLog::class, 'batch', 'entry_id');
     }
 
 }

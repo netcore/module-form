@@ -4,7 +4,9 @@ namespace Modules\Form\Models;
 
 use Dimsav\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Admin\Traits\SyncTranslations;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Translate\Traits\SyncTranslations;
 use Modules\Form\Translations\FormFieldTranslation;
 
 class FormField extends Model
@@ -52,10 +54,12 @@ class FormField extends Model
      */
     protected $with = ['translations'];
 
+    /* ---------------- Relations -------------------- */
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function form()
+    public function form(): BelongsTo
     {
         return $this->belongsTo(Form::class);
     }
@@ -63,10 +67,12 @@ class FormField extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function entries()
+    public function entries(): HasMany
     {
         return $this->hasMany(FormEntry::class);
     }
+
+    /* ---------------- Other methods -------------------- */
 
     /**
      * @return array
@@ -77,10 +83,6 @@ class FormField extends Model
 
         if (!is_array($attributes)) {
             $attributes = [];
-        }
-
-        if (!isset($attributes['class'])) {
-            $attributes['class'] = $this->getClass();
         }
 
         if (!isset($attributes['placeholder'])) {

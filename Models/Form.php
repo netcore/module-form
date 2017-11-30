@@ -2,14 +2,17 @@
 
 namespace Modules\Form\Models;
 
+use Dimsav\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Form\Models\FormField;
-use Modules\Form\Models\FormEntry;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Form\PassThroughs\Form\GetEntries;
 use Modules\Form\Rules\FormUnique;
+use Modules\Form\Translations\FormTranslation;
+use Modules\Translate\Traits\SyncTranslations;
 
 class Form extends Model
 {
+    use Translatable, SyncTranslations;
 
     /**
      * @var string
@@ -21,13 +24,33 @@ class Form extends Model
      */
     protected $fillable = [
         'key',
-        'name'
+        'template'
     ];
+
+    /**
+     * @var string
+     */
+    public $translationModel = FormTranslation::class;
+
+    /**
+     * @var array
+     */
+    public $translatedAttributes = [
+        'name',
+        'success_message'
+    ];
+
+    /**
+     * @var array
+     */
+    protected $with = ['translations'];
+
+    /* ---------------- Relations -------------------- */
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function fields()
+    public function fields(): HasMany
     {
         return $this->hasMany(FormField::class);
     }
@@ -35,10 +58,20 @@ class Form extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function form_entries()
+    public function form_entries(): HasMany
     {
         return $this->hasMany(FormEntry::class);
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function entry_logs(): HasMany
+    {
+        return $this->hasMany(FormEntryLog::class);
+    }
+
+    /* ---------------- Other methods -------------------- */
 
     /**
      * @return GetEntries

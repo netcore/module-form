@@ -2,10 +2,25 @@
     <link rel="stylesheet" href="{{ versionedAsset('assets/form/admin/css/form.css') }}">
 @endsection
 
-<div class="form-group no-margin-hr">
-    {!! Form::label('name', 'Name') !!}
-    {!! Form::text('name', null, ['class' => 'form-control']) !!}
+@include('translate::_partials._nav_tabs')
+
+<div class="tab-content">
+    @foreach($languages as $language)
+        <div role="tabpanel" class="tab-pane {{ $loop->first ? 'active' : '' }}" id="{{ $language->iso_code }}">
+            <div class="form-group no-margin-hr">
+                {!! Form::label('name', 'Name') !!}
+                {!! Form::text('translations['.$language->iso_code.'][name]', trans_model((isset($form) ? $form : null), $language, 'name'), ['class' => 'form-control']) !!}
+            </div>
+
+            <div class="form-group no-margin-hr">
+                {!! Form::label('success_message', 'Success message') !!}
+                {!! Form::text('translations['.$language->iso_code.'][success_message]', trans_model((isset($form) ? $form : null), $language, 'success_message'), ['class' => 'form-control']) !!}
+            </div>
+        </div>
+    @endforeach
 </div>
+
+<hr>
 
 {!! Form::label('fields', 'Fields') !!}
 
