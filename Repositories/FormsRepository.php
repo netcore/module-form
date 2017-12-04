@@ -141,6 +141,7 @@ class FormsRepository
 
         if ($template && view()->exists($template)) {
             return view($template, [
+                'form'   => $form,
                 'url'    => route('form::store', $form),
                 'fields' => $form->fields
             ]);
