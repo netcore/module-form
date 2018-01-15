@@ -47,7 +47,7 @@
                                         :class="{active: key == 0}"
                                 >
                                     <a
-                                            :href="'#fields-'+ language.iso_code"
+                                            :href="'#fields-' + model.id + '-' + language.iso_code"
                                             :aria-controls="language.iso_code"
                                             role="tab"
                                             data-toggle="tab"
@@ -58,7 +58,7 @@
                             </ul>
                             <div class="tab-content">
                                 <div v-for="(language, key) in languages" role="tabpanel" class="tab-pane"
-                                     :class="{active: key == 0}" :id="'fields-' + language.iso_code">
+                                     :class="{active: key == 0}" :id="'fields-' + model.id + '-' + language.iso_code">
                                     <div class="form-group">
                                         <label v-text="'Label ' + language.iso_code.toUpperCase()"></label>
                                         <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][label]'"
