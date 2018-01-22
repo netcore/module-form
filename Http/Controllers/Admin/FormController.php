@@ -4,7 +4,6 @@ namespace Modules\Form\Http\Controllers\Admin;
 
 use Carbon\Carbon;
 use Excel;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Maatwebsite\Excel\Writers\CellWriter;
@@ -92,7 +91,7 @@ class FormController extends Controller
         foreach ($newFields as $formField) {
             $field = $form->fields()->where('key', $formField['key'])->first();
 
-            if (!$field) {
+            if (! $field) {
                 $field = $form->fields()->create($this->field($formField, null, 'create'));
                 $field->storeTranslations($formField['translations']);
             } else {
@@ -108,7 +107,7 @@ class FormController extends Controller
         foreach ($fieldsToRemove as $formField) {
             $field = $form->fields()->where('key', $formField['key'])->first();
 
-            if (!$field) {
+            if (! $field) {
                 continue;
             }
 
@@ -123,6 +122,7 @@ class FormController extends Controller
      *
      * @param  Form $form
      * @return Response
+     * @throws \Exception
      */
     public function destroy(Form $form)
     {
@@ -139,6 +139,7 @@ class FormController extends Controller
 
     /**
      * @param string $form
+     * @param string $type
      * @return mixed
      */
     public function export($form = 'all', $type = 'xlsx')
@@ -149,11 +150,11 @@ class FormController extends Controller
             $forms = Form::find($form);
         }
 
-        if (!$forms) {
+        if (! $forms) {
             return back()->withErrors('Form not found!');
         }
 
-        if (!in_array($type, ['xlsx', 'csv'])) {
+        if (! in_array($type, ['xlsx', 'csv'])) {
             $type = 'xlsx';
         }
 
@@ -163,6 +164,7 @@ class FormController extends Controller
             $excel->sheet('Forms', function ($sheet) use ($form, $forms) {
 
                 if ($form == 'all') {
+                    $row = 2;
                     foreach ($forms as $key => $form) {
                         $entries = $form->entries()->count();
                         $row = $key == 0 ? 1 : $row + $entries;
@@ -200,6 +202,7 @@ class FormController extends Controller
     }
 
     /**
+     * @param null $data
      * @return array
      */
     private function getFields($data = null)
@@ -208,7 +211,14 @@ class FormController extends Controller
         $oldFields = old('fields', []);
 
         if ($data) {
-            $currentFields = $data->fields()->with('translations')->orderBy('order', 'ASC')->get()->toArray();
+            $currentFields = $data->fields()->with('translations')->orderBy('order', 'ASC')->get()->transform(function (
+                $f
+            ) {
+                $field = $f->toArray();
+                $field['translations'] = $f->translations->keyBy('locale');
+
+                return $field;
+            })->toArray();
         }
 
         $fields = array_merge($oldFields, $currentFields);
@@ -224,6 +234,7 @@ class FormController extends Controller
     }
 
     /**
+     * @param $id
      * @param $field
      * @return array
      */
@@ -264,7 +275,7 @@ class FormController extends Controller
             return $data;
         }
 
-        if (!$data) {
+        if (! $data) {
             return [];
         }
 
@@ -272,7 +283,9 @@ class FormController extends Controller
     }
 
     /**
-     * @param $formField
+     * @param        $formField
+     * @param null   $order
+     * @param string $action
      * @return array
      */
     private function field($formField, $order = null, $action = 'update'): array
