@@ -24,7 +24,7 @@
                     <table class="table table-bordered" id="datatable">
                         <thead>
                         <tr>
-                            @foreach ($form->fields as $field)
+                            @foreach ($form->fields->sortBy('order') as $field)
                                 <th>{{ $field->label }}</th>
                             @endforeach
                             <th>Submitted At</th>
@@ -50,7 +50,7 @@
                 ajax: '{{ route('admin::form.entries.pagination', $form->id) }}',
 
                 columns: [
-                    @foreach ($form->fields as $field)
+                    @foreach ($form->fields->sortBy('order') as $field)
                     {data: '{{ $field->key }}', name: '{{ $field->key }}'},
                     @endforeach
                     {
