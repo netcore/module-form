@@ -3,7 +3,7 @@
         <div class="panel panel-default">
             <div class="panel-heading" role="tab" :id="'heading-' + model.id">
                 <h4 class="panel-title">
-                    <div class="pull-left">
+                    <div class="pull-left handle">
                         <i class="fa fa-arrows"></i>
                     </div>
                     <a role="button" data-toggle="collapse" data-parent="#accordion" :href="'#collapse-' + model.id"
@@ -20,8 +20,8 @@
             <div :id="'collapse-' + model.id" class="panel-collapse collapse" role="tabpanel"
                  :aria-labelledby="'heading-' + model.id">
                 <div class="panel-body">
-                    <input type="hidden" :name="'fields['+model.id+'][order]'" v-model="model.order"
-                           :value="model.order"/>
+                	<input type="hidden" :name="'fields['+model.id+'][id]'" v-model="model.id" :value="model.id"/>
+                    <input type="hidden" :name="'fields['+model.id+'][order]'" v-model="model.order" :value="model.order"/>
                     <input type="hidden" :name="'fields['+model.id+'][type]'" :value="model.type"/>
                     <input type="hidden" :name="'fields['+model.id+'][type_name]'" :value="model.type_name"/>
 
@@ -44,7 +44,7 @@
                                 <li
                                         v-for="(language, key) in languages"
                                         role="presentation"
-                                        :class="{active: key == 0}"
+                                        :class="{active: key === 0}"
                                 >
                                     <a
                                             :href="'#fields-' + model.id + '-' + language.iso_code"
@@ -58,27 +58,34 @@
                             </ul>
                             <div class="tab-content">
                                 <div v-for="(language, key) in languages" role="tabpanel" class="tab-pane"
-                                     :class="{active: key == 0}" :id="'fields-' + model.id + '-' + language.iso_code">
-                                    <div class="form-group">
-                                        <label v-text="'Label ' + language.iso_code.toUpperCase()"></label>
-                                        <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][label]'"
-                                               v-model="model.translations[String(language.iso_code)].label"
-                                               class="form-control"
-                                               placeholder="For example, Phone number"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label v-text="'Placeholder ' + language.iso_code.toUpperCase()"></label>
-                                        <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][placeholder]'"
-                                               v-model="model.translations[String(language.iso_code)].placeholder"
-                                               class="form-control"
-                                               placeholder="For example, Enter phone number"/>
+                                     :class="{active: key === 0}" :id="'fields-' + model.id + '-' + language.iso_code">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label v-text="'Label ' + language.iso_code.toUpperCase()"></label>
+                                                <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][label]'"
+                                                       v-model="model.translations[String(language.iso_code)].label"
+                                                       class="form-control"
+                                                       placeholder="For example, Phone number"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label v-text="'Placeholder ' + language.iso_code.toUpperCase()"></label>
+                                                <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][placeholder]'"
+                                                       v-model="model.translations[String(language.iso_code)].placeholder"
+                                                       class="form-control"
+                                                       placeholder="For example, Enter phone number"/>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group" v-if="model.type == 'select'">
+                    <div class="form-group" v-if="model.type === 'select'">
                         <label>Options</label>
                         <br>
                         <button type="button" class="btn btn-success btn-xs" @click="addOption()">
@@ -86,11 +93,9 @@
                         </button>
                         <br>
                         <div class="input-group" v-for="(option, key) in options">
-                            <input type="text" :name="'fields['+model.id+'][options][value][]'" :value="option.value"
-                                   class="form-control"/>
+                            <input type="text" :name="'fields['+model.id+'][options][key][]'" :value="option.value" v-model="option.key" class="form-control"/>
                             <span class="input-group-addon">-</span>
-                            <input type="text" :name="'fields['+model.id+'][options][text][]'" :value="option.text"
-                                   class="form-control"/>
+                            <input type="text" :name="'fields['+model.id+'][options][value][]'" :value="option.text" v-model="option.value" class="form-control"/>
                             <span class="input-group-addon">
                                 <button type="button" class="btn btn-danger btn-xs"
                                         @click="removeOption(key)">Delete</button>
@@ -101,7 +106,7 @@
                     <div class="form-group">
                         <label>Attributes</label>
                         <select2
-                                :data="[{id: 'required', 'text': 'Required'}, {id: 'disabled', 'text': 'Disabled'}]"
+                                :data="htmlAttributes"
                                 :name="'fields['+model.id+'][attributes][]'"
                                 :placeholder="'Please select'"
                                 :multiple="true"
@@ -132,6 +137,10 @@
 <script>
     export default {
 
+        components: {
+            'select2': window.Select2
+        },
+
         props: {
             data: Object,
             languages: Array,
@@ -139,13 +148,19 @@
 
         data: function () {
             return {
+                htmlAttributes: [
+                    {id: 'required', 'text': 'Required'},
+                    {id: 'disabled', 'text': 'Disabled'}
+                ],
                 validationRules: [
                     {id: 'accepted', 'text': 'Accepted'},
                     {id: 'email', 'text': 'Email'},
                     {id: 'file', 'text': 'File'},
                     {id: 'image', 'text': 'Image'},
                     {id: 'required', 'text': 'Required'},
-                    {id: 'unique', 'text': 'Unique'}
+                    {id: 'unique', 'text': 'Unique'},
+                    {id: 'numeric', 'text': 'Numeric'},
+                    {id: 'url', 'text': 'URL'},
                 ],
                 attributes: this.data['meta'] ? this.data['meta']['attributes'] : [],
                 options: [],
@@ -182,7 +197,10 @@
 
         methods: {
             addOption() {
-                this.options.push({});
+                this.options.push({
+                    'key': '',
+                    'value': ''
+                });
             },
 
             removeOption(option) {
@@ -200,8 +218,8 @@
                 for (var key in options) {
                     if (options.hasOwnProperty(key)) {
                         tmpArray.push({
-                            value: key,
-                            text: options[key]
+                            key: key,
+                            value: options[key]
                         });
                     }
                 }

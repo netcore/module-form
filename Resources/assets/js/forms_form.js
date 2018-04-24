@@ -11,8 +11,8 @@ new Vue({
     },
 
     data: {
-        languages: languages,
-        formFields: currentFields,
+        languages: JSON.parse($('#languages').val()),
+        formFields: Object.values(JSON.parse($('#currentFields').val())),
         availableFields: [
             {
                 'name': 'Text',
@@ -34,6 +34,14 @@ new Vue({
                 'name': 'File',
                 'type': 'file'
             },
+            {
+                'name': 'Email',
+                'type': 'email'
+            },
+            {
+                'name': 'Number',
+                'type': 'number'
+            },
         ]
     },
 
@@ -48,25 +56,24 @@ new Vue({
             var translations = {};
 
             $.each(this.languages, function (i, language) {
-                var isoCode = language.iso_code;
-                translations[isoCode] = {
+                translations[language.iso_code] = {
                     'name': 'Unnamed field'
                 }
             });
 
             this.formFields.push({
-                'id': this.formFields.length,
+                'id': this.getNextId(this.formFields, 'id'),
                 'type': field.type,
                 'type_name': field.name,
                 'translations': translations,
-                'order': this.formFields.length + 1
+                'order': this.getNextId(this.formFields, 'order'),
             });
         },
 
         removeField(field) {
             var index = this.findIndex('id', field.id);
 
-            if (index != -1) {
+            if (index !== -1) {
                 this.formFields.splice(index, 1);
             }
         },
@@ -88,5 +95,15 @@ new Vue({
 
             return result;
         },
+
+        getNextId: function (array, key) {
+            var ids = array.map(function (el) {
+                return el[key];
+            });
+            var maxId = Math.max.apply(null, ids);
+
+            return maxId !== -Infinity ? maxId + 1 : 1;
+        }
+
     }
 });

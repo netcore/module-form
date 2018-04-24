@@ -2,17 +2,18 @@
 
 namespace Modules\Form\Http\Controllers\Admin;
 
-use Carbon\Carbon;
-use Excel;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Maatwebsite\Excel\Writers\CellWriter;
 use Modules\Form\Http\Requests\Admin\FormsRequest;
 use Modules\Form\Models\Form;
+use Modules\Form\Traits\ExportTrait;
+use Modules\Form\Traits\FieldTrait;
 use Netcore\Translator\Helpers\TransHelper;
 
 class FormController extends Controller
 {
+    use ExportTrait, FieldTrait;
+
     /**
      * Display a listing of the resource.
      *
@@ -89,9 +90,9 @@ class FormController extends Controller
 
         // Fields
         foreach ($newFields as $formField) {
-            $field = $form->fields()->where('key', $formField['key'])->first();
+            $field = $form->fields()->where('id', $formField['id'])->first();
 
-            if (! $field) {
+            if (!$field) {
                 $field = $form->fields()->create($this->field($formField, null, 'create'));
                 $field->storeTranslations($formField['translations']);
             } else {
@@ -102,12 +103,12 @@ class FormController extends Controller
 
         // Remove fields
         $fieldsToRemove = array_udiff($formFields, $newFields, function ($a, $b) {
-            return strcmp($a['key'], $b['key']);
+            return strcmp($a['id'], $b['id']);
         });
         foreach ($fieldsToRemove as $formField) {
-            $field = $form->fields()->where('key', $formField['key'])->first();
+            $field = $form->fields()->where('id', $formField['id'])->first();
 
-            if (! $field) {
+            if (!$field) {
                 continue;
             }
 
@@ -135,176 +136,5 @@ class FormController extends Controller
         }
 
         return back()->withSuccess('Successfully deleted');
-    }
-
-    /**
-     * @param string $form
-     * @param string $type
-     * @return mixed
-     */
-    public function export($form = 'all', $type = 'xlsx')
-    {
-        if ($form == 'all') {
-            $forms = Form::all();
-        } else {
-            $forms = Form::find($form);
-        }
-
-        if (! $forms) {
-            return back()->withErrors('Form not found!');
-        }
-
-        if (! in_array($type, ['xlsx', 'csv'])) {
-            $type = 'xlsx';
-        }
-
-        $name = $form == 'all' ? 'All forms' : 'Form - ' . $forms->name;
-        $name .= '-' . Carbon::now()->format('d.m.Y-H:i');
-        Excel::create($name, function ($excel) use ($form, $forms) {
-            $excel->sheet('Forms', function ($sheet) use ($form, $forms) {
-
-                if ($form == 'all') {
-                    $row = 2;
-                    foreach ($forms as $key => $form) {
-                        $entries = $form->entries()->count();
-                        $row = $key == 0 ? 1 : $row + $entries;
-
-                        if ($key == 0 || $row == ($row + $entries) - 1) {
-                            $sheet->row($row, $form->entries()->getColumns());
-                            $sheet->row($row, function (CellWriter $row) {
-                                $row->setFontWeight(true);
-                                $row->setBackground('#cccccc');
-                            });
-                        }
-
-                        foreach ($form->entries()->all() as $key => $entry) {
-                            $row++;
-                            $sheet->row($row, $entry);
-                        }
-                    }
-                } else {
-                    $row = 2;
-
-                    $sheet->row(1, $forms->entries()->getColumns());
-                    $sheet->row(1, function (CellWriter $row) {
-                        $row->setFontWeight(true);
-                        $row->setBackground('#cccccc');
-                    });
-
-                    foreach ($forms->entries()->all() as $key => $entry) {
-                        $sheet->row($row, $entry);
-                        $row++;
-                    }
-                }
-            });
-
-        })->download($type);
-    }
-
-    /**
-     * @param null $data
-     * @return array
-     */
-    private function getFields($data = null)
-    {
-        $currentFields = [];
-        $oldFields = old('fields', []);
-
-        if ($data) {
-            $currentFields = $data->fields()->with('translations')->orderBy('order', 'ASC')->get()->transform(function (
-                $f
-            ) {
-                $field = $f->toArray();
-                $field['translations'] = $f->translations->keyBy('locale');
-
-                return $field;
-            })->toArray();
-        }
-
-        $fields = array_merge($oldFields, $currentFields);
-
-        // Unique
-        $fields = array_filter($fields, function ($value, $key) use ($fields) {
-            return $key === array_search($value['key'], array_column($fields, 'key'));
-        }, ARRAY_FILTER_USE_BOTH);
-
-        return collect($fields)->map(function ($field, $id) {
-            return $this->mapField($id, $field);
-        });
-    }
-
-    /**
-     * @param $id
-     * @param $field
-     * @return array
-     */
-    private function mapField($id, $field)
-    {
-        $translations = [];
-        $languages = TransHelper::getAllLanguages();
-
-        foreach ($languages as $key => $language) {
-            $translations[$language->iso_code] = [
-                'name'        => isset($field['translations'][$language->iso_code]) ? $field['translations'][$language->iso_code]['label'] : (isset($field['translations'][$key]['label']) ? $field['translations'][$key]['label'] : '(Not specified)'),
-                'label'       => isset($field['translations'][$language->iso_code]) ? $field['translations'][$language->iso_code]['label'] : (isset($field['translations'][$key]['label']) ? $field['translations'][$key]['label'] : ''),
-                'placeholder' => isset($field['translations'][$language->iso_code]) ? $field['translations'][$language->iso_code]['placeholder'] : (isset($field['translations'][$key]['placeholder']) ? $field['translations'][$key]['placeholder'] : '')
-            ];
-        }
-
-        return [
-            'id'           => $id,
-            'key'          => $field['key'],
-            'type'         => $field['type'],
-            'type_name'    => ucfirst($field['type']),
-            'translations' => $translations,
-            'order'        => $id + 1,
-            'meta'         => $this->parseData($field, 'meta')
-        ];
-    }
-
-    /**
-     * @param $formField
-     * @param $type
-     * @return array
-     */
-    private function parseData($formField, $type)
-    {
-        $data = isset($formField[$type]) ? $formField[$type] : [];
-
-        if ($type != 'options') {
-            return $data;
-        }
-
-        if (! $data) {
-            return [];
-        }
-
-        return array_combine($data['value'], $data['text']);
-    }
-
-    /**
-     * @param        $formField
-     * @param null   $order
-     * @param string $action
-     * @return array
-     */
-    private function field($formField, $order = null, $action = 'update'): array
-    {
-        $data = [
-            'meta'       => [
-                'attributes' => $this->parseData($formField, 'attributes'),
-                'options'    => $this->parseData($formField, 'options'),
-                'validation' => $this->parseData($formField, 'validation')
-            ],
-            'order'      => $order ?: $formField['order'],
-            'show_label' => isset($formField['show_label']) ? 1 : 0
-        ];
-
-        if ($action == 'create') {
-            $data['key'] = $formField['key'];
-            $data['type'] = $formField['type'];
-        }
-
-        return $data;
     }
 }
