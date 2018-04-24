@@ -2,6 +2,9 @@
     <link rel="stylesheet" href="{{ versionedAsset('assets/form/admin/css/form.css') }}">
 @endsection
 
+<input type="hidden" id="languages" value="{{ $languages->toJson() }}"/>
+<input type="hidden" id="currentFields" value="{{ $fields->toJson() }}"/>
+
 @include('translate::_partials._nav_tabs')
 
 <div class="tab-content">
@@ -37,7 +40,7 @@
     <div class="col-lg-8">
         <div v-if="formFields.length">
             <div id="accordion" role="tablist" aria-multiselectable="true">
-                <draggable v-model="formFields" @update="updateOrder">
+                <draggable v-model="formFields" @update="updateOrder" :options="{handle:'.handle'}">
                     <form-field v-for="field in formFields" :data="field" :key="field.id" v-on:remove-field="removeField(field)" :languages="languages"></form-field>
                 </draggable>
             </div>
@@ -49,12 +52,5 @@
 </div>
 
 @section('scripts')
-    <script>
-        var languages = '{{ $languages->toJson() }}';
-        var currentFields = '{{ $fields->toJson() }}';
-
-        languages = JSON.parse(languages.replace(/&quot;/g, '"'));
-        currentFields = JSON.parse(currentFields.replace(/&quot;/g, '"'));
-    </script>
     <script src="{{ versionedAsset('assets/form/admin/js/forms_form.js') }}"></script>
 @endsection
