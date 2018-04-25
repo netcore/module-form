@@ -74,9 +74,9 @@ trait FieldTrait
     /**
      * @param $formField
      * @param $type
-     * @return array
+     * @return mixed
      */
-    private function parseData($formField, $type): array
+    private function parseData($formField, $type)
     {
         $data = isset($formField[$type]) ? $formField[$type] : [];
 
@@ -88,7 +88,7 @@ trait FieldTrait
             return [];
         }
 
-        return array_combine($data['key'], $data['value']);
+        return $formField['options_type'] === 'data' ? array_combine($data['key'], $data['value']) : $data;
     }
 
     /**
@@ -101,9 +101,10 @@ trait FieldTrait
     {
         $data = [
             'meta'       => [
-                'attributes' => $this->parseData($formField, 'attributes'),
-                'options'    => $this->parseData($formField, 'options'),
-                'validation' => $this->parseData($formField, 'validation')
+                'attributes'   => $this->parseData($formField, 'attributes'),
+                'options'      => $this->parseData($formField, 'options'),
+                'options_type' => $this->parseData($formField, 'option_type'),
+                'validation'   => $this->parseData($formField, 'validation')
             ],
             'order'      => $order ?: $formField['order'],
             'show_label' => isset($formField['show_label']) ? 1 : 0
