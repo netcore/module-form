@@ -75,9 +75,10 @@ class FormField extends Model
     /* ---------------- Other methods -------------------- */
 
     /**
+     * @param bool $parsed
      * @return array
      */
-    public function getAttributesData()
+    public function getAttributesData($parsed = true)
     {
         $attributes = array_get($this->meta, 'attributes', []);
 
@@ -85,11 +86,9 @@ class FormField extends Model
             $attributes = [];
         }
 
-        if (!isset($attributes['placeholder'])) {
-            $attributes['placeholder'] = $this->placeholder;
-        }
-
-        return $attributes;
+        return $parsed ? implode(' ', array_map(function ($v, $k) {
+            return sprintf('%s=%s', $k, $v);
+        }, $attributes, array_keys($attributes))) : $attributes;
     }
 
     /**

@@ -20,7 +20,7 @@
             <div :id="'collapse-' + model.id" class="panel-collapse collapse" role="tabpanel"
                  :aria-labelledby="'heading-' + model.id">
                 <div class="panel-body">
-                	<input type="hidden" :name="'fields['+model.id+'][id]'" v-model="model.id" :value="model.id"/>
+                    <input type="hidden" :name="'fields['+model.id+'][id]'" v-model="model.id" :value="model.id"/>
                     <input type="hidden" :name="'fields['+model.id+'][order]'" v-model="model.order" :value="model.order"/>
                     <input type="hidden" :name="'fields['+model.id+'][type]'" :value="model.type"/>
                     <input type="hidden" :name="'fields['+model.id+'][type_name]'" :value="model.type_name"/>
@@ -34,8 +34,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Show label?</label><br>
-                        <input type="checkbox" :name="'fields['+model.id+'][show_label]'" v-model="data.show_label"/>
+                        <label>Show label?</label>
+                        <input type="checkbox" :name="'fields['+model.id+'][show_label]'" v-model="data.show_label">
                     </div>
 
                     <div class="row">
@@ -85,44 +85,78 @@
                         </div>
                     </div>
 
-                    <div class="form-group" v-if="model.type === 'select'">
-                        <label>Options</label>
-                        <br>
-                        <button type="button" class="btn btn-success btn-xs" @click="addOption()">
-                            <i class="fa fa-plus"></i> Add Field
-                        </button>
-                        <br>
-                        <div class="input-group" v-for="(option, key) in options">
-                            <input type="text" :name="'fields['+model.id+'][options][key][]'" :value="option.value" v-model="option.key" class="form-control"/>
-                            <span class="input-group-addon">-</span>
-                            <input type="text" :name="'fields['+model.id+'][options][value][]'" :value="option.text" v-model="option.value" class="form-control"/>
-                            <span class="input-group-addon">
-                                <button type="button" class="btn btn-danger btn-xs"
-                                        @click="removeOption(key)">Delete</button>
-                            </span>
+                    <div v-if="model.type === 'select'">
+                        <div class="form-group">
+                            <label>Options</label>
+                            <br>
+                            <select2
+                                    :data="optionTypes"
+                                    :name="'fields['+model.id+'][options_type]'"
+                                    :placeholder="'Please select'"
+                                    v-model="optionsType"
+                            ></select2>
+                        </div>
+
+                        <div class="form-group" v-if="optionsType === 'data'">
+                            <button type="button" class="btn btn-success btn-xs" @click="addOption()">
+                                <i class="fa fa-plus"></i> Add Option
+                            </button>
+                            <br>
+                            <div class="input-group" v-for="(option, key) in optionsData">
+                                <input type="text" :name="'fields['+model.id+'][options][key][]'"
+                                       v-model="option.key"
+                                       class="form-control"/>
+                                <span class="input-group-addon">-</span>
+                                <input type="text" :name="'fields['+model.id+'][options][value][]'"
+                                       v-model="option.value"
+                                       class="form-control"/>
+                                <span class="input-group-addon">
+                                    <button type="button"
+                                            class="btn btn-danger btn-xs"
+                                            @click="removeOption(key)">
+                                        <i class="fa fa-trash"></i> Remove
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div v-if="optionsType === 'function'">
+                            <div class="form-group">
+                                <label>Function name</label>
+                                <input :name="'fields['+model.id+'][options]'"
+                                       v-model="optionsFunction"
+                                       class="form-control"
+                                       placeholder="For example, getCountriesList"/>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Attributes</label>
-                        <select2
-                                :data="htmlAttributes"
-                                :name="'fields['+model.id+'][attributes][]'"
-                                :placeholder="'Please select'"
-                                :multiple="true"
-                                v-model="attributes"
-                        ></select2>
-                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Attributes</label>
+                                <select2
+                                        :data="htmlAttributes"
+                                        :name="'fields['+model.id+'][attributes][]'"
+                                        :placeholder="'Please select'"
+                                        :multiple="true"
+                                        v-model="attributes"
+                                ></select2>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label>Validation rules</label>
-                        <select2
-                                :data="validationRules"
-                                :name="'fields['+model.id+'][validation][]'"
-                                :placeholder="'Please select'"
-                                :multiple="true"
-                                v-model="validation"
-                        ></select2>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Validation rules</label>
+                                <select2
+                                        :data="validationRules"
+                                        :name="'fields['+model.id+'][validation][]'"
+                                        :placeholder="'Please select'"
+                                        :multiple="true"
+                                        v-model="validation"
+                                ></select2>
+                            </div>
+                        </div>
                     </div>
 
                     <a href="javascript:;" class="btn btn-xs btn-danger pull-right" @click="remove(model)">
@@ -162,8 +196,14 @@
                     {id: 'numeric', 'text': 'Numeric'},
                     {id: 'url', 'text': 'URL'},
                 ],
+                optionTypes: [
+                    {id: 'function', 'text': 'Function'},
+                    {id: 'data', 'text': 'Data'},
+                ],
+                optionsData: [],
+                optionsFunction: '',
+                optionsType: this.data['meta'] && this.data['meta']['options_type'] !== undefined ? this.data['meta']['options_type'] : 'data',
                 attributes: this.data['meta'] ? this.data['meta']['attributes'] : [],
-                options: [],
                 validation: this.data['meta'] ? this.data['meta']['validation'] : []
             }
         },
@@ -197,34 +237,65 @@
 
         methods: {
             addOption() {
-                this.options.push({
+                this.optionsData.push({
                     'key': '',
                     'value': ''
                 });
             },
 
             removeOption(option) {
-                Vue.delete(this.options, option);
+                var self = this;
+
+                swal({
+                    title: "Are you sure?",
+                    text: "You will not be able to restore this data!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Delete!"
+                }).then(function () {
+                    Vue.delete(self.options, option);
+                    toastr.success('Option successfully removed!');
+                }).catch(swal.noop);
             },
 
             remove(field) {
-                this.$emit('remove-field', field);
+                var self = this;
+
+                swal({
+                    title: "Are you sure?",
+                    text: "You will not be able to restore this data!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Delete!"
+                }).then(function () {
+                    self.$emit('remove-field', field);
+                    toastr.success('Field successfully removed!');
+                }).catch(swal.noop);
             },
 
             setOptions() {
                 var options = this.data['meta'] ? this.data['meta']['options'] : [];
-                var tmpArray = [];
 
-                for (var key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        tmpArray.push({
-                            key: key,
-                            value: options[key]
-                        });
+                if (typeof options === 'object') {
+                    var tmpArray = [];
+
+                    for (var key in options) {
+                        if (options.hasOwnProperty(key)) {
+                            tmpArray.push({
+                                key: key,
+                                value: options[key]
+                            });
+                        }
                     }
-                }
 
-                this.options = tmpArray;
+                    this.optionsType = 'data';
+                    this.optionsData = tmpArray;
+                } else {
+                    this.optionsType = 'function';
+                    this.optionsFunction = options;
+                }
             }
         }
     }
