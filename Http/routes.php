@@ -8,6 +8,11 @@ Route::group([
         'as'   => 'form::store',
         'uses' => 'FormController@store'
     ]);
+
+    Route::get('/form/{form}/success', [
+        'as'   => 'form::success',
+        'uses' => 'FormController@success'
+    ]);
 });
 
 Route::group([

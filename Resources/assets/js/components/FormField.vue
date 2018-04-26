@@ -26,23 +26,6 @@
                            :value="data.order"/>
                     <input type="hidden" :name="'fields['+data.id+'][type]'" :value="data.type"/>
 
-                    <div class="form-group"
-                         :class="{ 'has-error': $root.formErrors.has('fields.' + data.id + '.key') }">
-                        <label>Key</label>
-                        <input :name="'fields['+data.id+'][key]'"
-                               v-model="data.key"
-                               class="form-control"
-                               placeholder="For example, phone_number"/>
-                        <span v-if="$root.formErrors.has('fields.' + data.id + '.key')"
-                              class="help-block"
-                              v-text="$root.formErrors.get('fields.' + data.id + '.key')"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Show label?</label><br>
-                        <input type="checkbox" :name="'fields['+data.id+'][show_label]'" v-model="data.show_label">
-                    </div>
-
                     <div class="row">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-6">
                             <ul class="nav nav-tabs" role="tablist">
@@ -96,6 +79,36 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-10">
+                            <div class="form-group"
+                                 :class="{ 'has-error': $root.formErrors.has('fields.' + data.id + '.key') }">
+                                <label>Key</label>
+                                <input :name="'fields['+data.id+'][key]'"
+                                       v-model="data.key"
+                                       class="form-control"
+                                       placeholder="For example, phone_number"/>
+                                <span v-if="$root.formErrors.has('fields.' + data.id + '.key')"
+                                      class="help-block"
+                                      v-text="$root.formErrors.get('fields.' + data.id + '.key')"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-2">
+                            <div class="form-group">
+                                <label>Show label?</label>
+                                <label :for="'success-view-' + data.id" class="switcher switcher-success">
+                                    <input type="checkbox" :id="'success-view-' + data.id"
+                                           :name="'fields['+data.id+'][show_label]'" v-model="data.show_label">
+                                    <div class="switcher-indicator">
+                                        <div class="switcher-yes">YES</div>
+                                        <div class="switcher-no">NO</div>
+                                    </div>
+                                </label>
                             </div>
                         </div>
                     </div>

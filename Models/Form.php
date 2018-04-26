@@ -24,7 +24,8 @@ class Form extends Model
      */
     protected $fillable = [
         'key',
-        'template'
+        'template',
+        'has_success_view'
     ];
 
     /**

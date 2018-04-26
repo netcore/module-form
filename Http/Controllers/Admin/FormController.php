@@ -59,7 +59,10 @@ class FormController extends Controller
      */
     public function store(FormsRequest $request)
     {
-        $form = Form::create([]);
+        $request->merge([
+            'has_success_view' => $request->has('has_success_view')
+        ]);
+        $form = Form::create($request->only(['key', 'has_success_view']));
         $form->storeTranslations($request->get('translations', []));
 
         // Fields
@@ -100,6 +103,10 @@ class FormController extends Controller
      */
     public function update(FormsRequest $request, Form $form)
     {
+        $request->merge([
+            'has_success_view' => $request->has('has_success_view')
+        ]);
+        $form->update($request->only(['key', 'has_success_view']));
         $form->updateTranslations($request->get('translations', []));
 
         $fields = $request->get('fields', []);
