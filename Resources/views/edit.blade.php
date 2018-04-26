@@ -14,12 +14,19 @@
                     </div>
                     <h4 class="panel-title">Edit form</h4>
                 </div>
-                <div class="panel-body" id="formApp">
+                <div class="panel-body" id="formApp" v-cloak>
                     {!! Form::model($form, ['route' => ['admin::form.update', $form], 'method' => 'PATCH']) !!}
 
                     @include('form::_form')
 
-                    <button type="submit" class="btn btn-success pull-right"><i class="fa fa-save"></i> Save</button>
+                    <button type="button" :disabled="loading" class="btn btn-success pull-right" @click="submit()">
+                        <span v-if="loading">
+                            <i class="fa fa-refresh fa-spin"></i>
+                        </span>
+                        <span v-else>
+                           <i class="fa fa-save"></i> Save
+                        </span>
+                    </button>
                     {!! Form::close() !!}
                 </div>
             </div>

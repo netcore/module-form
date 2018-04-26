@@ -1,4 +1,53 @@
-'use strict';
+class Errors {
+    constructor() {
+        this.formErrors = {};
+        this.success = false;
+    }
+
+    record(errors) {
+        this.formErrors = errors;
+    }
+
+    any() {
+        return Object.keys(this.formErrors).length > 0;
+    }
+
+    has(field) {
+        return this.formErrors.hasOwnProperty(field);
+    }
+
+    hasPartial(field) {
+        var exists = false;
+
+        $.each(this.formErrors, function (key, value) {
+            if (key.indexOf(field) !== -1) {
+                exists = true;
+            }
+        });
+
+        return exists;
+    }
+
+    get(field) {
+        if (this.formErrors[field]) {
+            return this.formErrors[field][0];
+        }
+    }
+
+    clear(field) {
+        Vue.delete(this.formErrors, field);
+    }
+
+    clearAll(fields) {
+        var self = this;
+
+        $.each(fields, function (key, field) {
+            if (self.get(field)) {
+                Vue.delete(self.formErrors, field);
+            }
+        });
+    }
+}
 
 import draggable from 'vuedraggable';
 
@@ -11,8 +60,10 @@ new Vue({
     },
 
     data: {
+        formErrors: new Errors(),
         languages: JSON.parse($('#languages').val()),
-        formFields: Object.values(JSON.parse($('#currentFields').val())),
+        form: JSON.parse($('#form').val()),
+        loading: false,
         availableFields: [
             {
                 'name': 'Text',
@@ -52,40 +103,96 @@ new Vue({
     },
 
     methods: {
+        submit: function () {
+            var self = this;
+            self.loading = true;
+
+            var $form = $('form');
+            var $formData = new FormData($form[0]);
+
+            $.ajax({
+                url: $form.attr('action'),
+                type: 'POST',
+                data: $formData,
+                processData: false,
+                contentType: false,
+                cache: false
+            })
+                .done(function (response) {
+                    window.location.replace(response.redirect);
+                })
+                .fail(function (response) {
+                    if (response.responseJSON.errors) {
+                        self.formErrors.record(response.responseJSON.errors);
+                    }
+
+                    self.loading = false;
+                });
+        },
+
         addField(field) {
             var translations = {};
 
             $.each(this.languages, function (i, language) {
                 translations[language.iso_code] = {
-                    'name': 'Unnamed field'
+                    label: 'Unnamed field',
+                    placeholder: ''
                 }
             });
 
-            this.formFields.push({
-                'id': this.getNextId(this.formFields, 'id'),
-                'type': field.type,
-                'type_name': field.name,
-                'translations': translations,
-                'order': this.getNextId(this.formFields, 'order'),
+            this.form.fields.push({
+                id: this.getNextId(this.form.fields, 'id'),
+                type: field.type,
+                translations: translations,
+                order: this.getNextId(this.form.fields, 'order'),
+                meta: {
+                    'attributes': [],
+                    'validation': [],
+                },
+                optionsData: [],
+                optionsFunction: '',
+                optionsType: 'data',
             });
         },
 
         removeField(field) {
-            var index = this.findIndex('id', field.id);
+            var self = this;
+            var text = 'You will not be able to restore this data!';
 
-            if (index !== -1) {
-                this.formFields.splice(index, 1);
+            if (self.form.id !== undefined) {
+                text = text + ' And all related entry data will be deleted!'
             }
+
+            swal({
+                title: 'Are you sure?',
+                text: text,
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Delete!',
+            }).then(function () {
+                if (self.form.id !== undefined) {
+                    $.post('/admin/form/' + self.form.id + '/' + field.id);
+                }
+
+                var index = self.findIndex('id', field.id);
+
+                if (index !== -1) {
+                    self.form.fields.splice(index, 1);
+                }
+
+                toastr.success('Field successfully deleted!');
+            }).catch(swal.noop);
         },
 
         updateOrder(e) {
-            this.formFields[e.newIndex]['order'] = e.newIndex + 1;
-            this.formFields[e.oldIndex]['order'] = e.oldIndex + 1;
+            this.form.fields[e.newIndex]['order'] = e.newIndex + 1;
+            this.form.fields[e.oldIndex]['order'] = e.oldIndex + 1;
         },
 
         findIndex(property, value) {
             var result = -1;
-            this.formFields.some(function (item, i) {
+            this.form.fields.some(function (item, i) {
                 if (item[property] === value) {
                     result = i;
 

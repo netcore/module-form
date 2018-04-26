@@ -38,6 +38,7 @@
                         </table>
                     </div>
                     <b>Additional information:</b><br/>
+                    Date/Time: {{ $entryLog ? $entryLog->created_at->format('d.m.Y H:i') : '' }}<br/>
                     IP: {{ $entryLog ? $entryLog->ip : '' }}<br/>
                     User Agent: {{ $entryLog ? $entryLog->user_agent : '' }}<br/>
                 </div>

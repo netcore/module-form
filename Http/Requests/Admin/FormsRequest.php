@@ -26,7 +26,7 @@ class FormsRequest extends FormRequest
     {
         $rules = [
             'fields'       => 'required',
-            'fields.*.key' => 'required'
+            'fields.*.key' => 'required|distinct'
         ];
 
         foreach (TransHelper::getAllLanguages() as $language) {
@@ -45,12 +45,14 @@ class FormsRequest extends FormRequest
     public function messages()
     {
         $messages = [
-            'fields.required' => 'Fields are required.'
+            'fields.required'       => 'Fields are required.',
+            'fields.*.key.required' => 'Key is required.',
+            'fields.*.key.distinct' => 'Key should be unique.'
         ];
 
         foreach (TransHelper::getAllLanguages() as $language) {
-            $messages['translations.' . $language->iso_code . '.name.required'] = 'Name (' . strtoupper($language->iso_code) . ') is required.';
-            $messages['fields.*.translations.' . $language->iso_code . '.label.required'] = 'Label (' . strtoupper($language->iso_code) . ') is required.';
+            $messages['translations.' . $language->iso_code . '.name.required'] = 'Name is required.';
+            $messages['fields.*.translations.' . $language->iso_code . '.label.required'] = 'Label is required.';
         }
 
         return $messages;
