@@ -1,41 +1,46 @@
 <template>
     <div>
         <div class="panel panel-default">
-            <div class="panel-heading" role="tab" :id="'heading-' + model.id">
+            <div class="panel-heading" role="tab" :id="'heading-' + data.id">
                 <h4 class="panel-title">
                     <div class="pull-left handle">
                         <i class="fa fa-arrows"></i>
                     </div>
-                    <a role="button" data-toggle="collapse" data-parent="#accordion" :href="'#collapse-' + model.id"
-                       aria-expanded="true" :aria-controls="'collapse-' + model.id">
-                        <div class="pull-left m-l-5" v-for="(translation, key) in model.translations">
-                            {{ key.toUpperCase() }}: {{ translation.name }}
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" :href="'#collapse-' + data.id"
+                       aria-expanded="true" :aria-controls="'collapse-' + data.id">
+                        <div class="pull-left m-l-5" v-for="(language, key) in languages">
+                            {{ language.iso_code.toUpperCase() }}: {{ data.translations[String(language.iso_code)].label }}
                         </div>
                     </a>
                     <div class="pull-right">
-                        {{ model.type_name }}
+                        {{ camelCase(data.type) }}
+                        <span v-if="$root.formErrors.hasPartial('fields.' + data.id + '.')" class="badge">!</span>
                     </div>
                 </h4>
             </div>
-            <div :id="'collapse-' + model.id" class="panel-collapse collapse" role="tabpanel"
-                 :aria-labelledby="'heading-' + model.id">
+            <div :id="'collapse-' + data.id" class="panel-collapse collapse" role="tabpanel"
+                 :aria-labelledby="'heading-' + data.id">
                 <div class="panel-body">
-                    <input type="hidden" :name="'fields['+model.id+'][id]'" v-model="model.id" :value="model.id"/>
-                    <input type="hidden" :name="'fields['+model.id+'][order]'" v-model="model.order" :value="model.order"/>
-                    <input type="hidden" :name="'fields['+model.id+'][type]'" :value="model.type"/>
-                    <input type="hidden" :name="'fields['+model.id+'][type_name]'" :value="model.type_name"/>
+                    <input type="hidden" :name="'fields['+data.id+'][id]'" v-model="data.id" :value="data.id"/>
+                    <input type="hidden" :name="'fields['+data.id+'][order]'" v-model="data.order"
+                           :value="data.order"/>
+                    <input type="hidden" :name="'fields['+data.id+'][type]'" :value="data.type"/>
 
-                    <div class="form-group">
+                    <div class="form-group"
+                         :class="{ 'has-error': $root.formErrors.has('fields.' + data.id + '.key') }">
                         <label>Key</label>
-                        <input :name="'fields['+model.id+'][key]'"
+                        <input :name="'fields['+data.id+'][key]'"
                                v-model="data.key"
                                class="form-control"
                                placeholder="For example, phone_number"/>
+                        <span v-if="$root.formErrors.has('fields.' + data.id + '.key')"
+                              class="help-block"
+                              v-text="$root.formErrors.get('fields.' + data.id + '.key')"></span>
                     </div>
 
                     <div class="form-group">
-                        <label>Show label?</label>
-                        <input type="checkbox" :name="'fields['+model.id+'][show_label]'" v-model="data.show_label">
+                        <label>Show label?</label><br>
+                        <input type="checkbox" :name="'fields['+data.id+'][show_label]'" v-model="data.show_label">
                     </div>
 
                     <div class="row">
@@ -47,36 +52,46 @@
                                         :class="{active: key === 0}"
                                 >
                                     <a
-                                            :href="'#fields-' + model.id + '-' + language.iso_code"
+                                            :href="'#fields-' + data.id + '-' + language.iso_code"
                                             :aria-controls="language.iso_code"
                                             role="tab"
                                             data-toggle="tab"
                                     >
                                         {{ language.title_localized }}
+                                        <span v-if="$root.formErrors.hasPartial('fields.' + data.id + '.translations.' + language.iso_code)"
+                                              class="badge">!</span>
                                     </a>
                                 </li>
                             </ul>
                             <div class="tab-content">
                                 <div v-for="(language, key) in languages" role="tabpanel" class="tab-pane"
-                                     :class="{active: key === 0}" :id="'fields-' + model.id + '-' + language.iso_code">
+                                     :class="{active: key === 0}" :id="'fields-' + data.id + '-' + language.iso_code">
                                     <div class="row">
                                         <div class="col-lg-6">
-                                            <div class="form-group">
+                                            <div class="form-group"
+                                                 :class="{ 'has-error': $root.formErrors.has('fields.' + data.id + '.translations.' + language.iso_code + '.label') }">
                                                 <label v-text="'Label ' + language.iso_code.toUpperCase()"></label>
-                                                <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][label]'"
-                                                       v-model="model.translations[String(language.iso_code)].label"
+                                                <input :name="'fields['+data.id+'][translations]['+language.iso_code+'][label]'"
+                                                       v-model="data.translations[String(language.iso_code)].label"
                                                        class="form-control"
                                                        placeholder="For example, Phone number"/>
+                                                <span v-if="$root.formErrors.has('fields.' + data.id + '.translations.' + language.iso_code + '.label')"
+                                                      class="help-block"
+                                                      v-text="$root.formErrors.get('fields.' + data.id + '.translations.' + language.iso_code + '.label')"></span>
                                             </div>
                                         </div>
 
                                         <div class="col-lg-6">
-                                            <div class="form-group">
+                                            <div class="form-group"
+                                                 :class="{ 'has-error': $root.formErrors.has('fields.' + data.id + '.translations.' + language.iso_code + '.placeholder') }">
                                                 <label v-text="'Placeholder ' + language.iso_code.toUpperCase()"></label>
-                                                <input :name="'fields['+model.id+'][translations]['+language.iso_code+'][placeholder]'"
-                                                       v-model="model.translations[String(language.iso_code)].placeholder"
+                                                <input :name="'fields['+data.id+'][translations]['+language.iso_code+'][placeholder]'"
+                                                       v-model="data.translations[String(language.iso_code)].placeholder"
                                                        class="form-control"
                                                        placeholder="For example, Enter phone number"/>
+                                                <span v-if="$root.formErrors.has('fields.' + data.id + '.translations.' + language.iso_code + '.placeholder')"
+                                                      class="help-block"
+                                                      v-text="$root.formErrors.get('fields.' + data.id + '.translations.' + language.iso_code + '.placeholder')"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -85,29 +100,29 @@
                         </div>
                     </div>
 
-                    <div v-if="model.type === 'select'">
+                    <div v-if="data.type === 'select'">
                         <div class="form-group">
                             <label>Options</label>
                             <br>
                             <select2
                                     :data="optionTypes"
-                                    :name="'fields['+model.id+'][options_type]'"
+                                    :name="'fields['+data.id+'][options_type]'"
                                     :placeholder="'Please select'"
-                                    v-model="optionsType"
+                                    v-model="data.optionsType"
                             ></select2>
                         </div>
 
-                        <div class="form-group" v-if="optionsType === 'data'">
+                        <div class="form-group" v-if="data.optionsType === 'data'">
                             <button type="button" class="btn btn-success btn-xs" @click="addOption()">
                                 <i class="fa fa-plus"></i> Add Option
                             </button>
                             <br>
-                            <div class="input-group" v-for="(option, key) in optionsData">
-                                <input type="text" :name="'fields['+model.id+'][options][key][]'"
+                            <div class="input-group" v-for="(option, key) in data.optionsData">
+                                <input type="text" :name="'fields['+data.id+'][options][key][]'"
                                        v-model="option.key"
                                        class="form-control"/>
                                 <span class="input-group-addon">-</span>
-                                <input type="text" :name="'fields['+model.id+'][options][value][]'"
+                                <input type="text" :name="'fields['+data.id+'][options][value][]'"
                                        v-model="option.value"
                                        class="form-control"/>
                                 <span class="input-group-addon">
@@ -120,11 +135,11 @@
                             </div>
                         </div>
 
-                        <div v-if="optionsType === 'function'">
+                        <div v-if="data.optionsType === 'function'">
                             <div class="form-group">
                                 <label>Function name</label>
-                                <input :name="'fields['+model.id+'][options]'"
-                                       v-model="optionsFunction"
+                                <input :name="'fields['+data.id+'][options]'"
+                                       v-model="data.optionsFunction"
                                        class="form-control"
                                        placeholder="For example, getCountriesList"/>
                             </div>
@@ -137,10 +152,10 @@
                                 <label>Attributes</label>
                                 <select2
                                         :data="htmlAttributes"
-                                        :name="'fields['+model.id+'][attributes][]'"
+                                        :name="'fields['+data.id+'][attributes][]'"
                                         :placeholder="'Please select'"
                                         :multiple="true"
-                                        v-model="attributes"
+                                        v-model="data.meta.attributes"
                                 ></select2>
                             </div>
                         </div>
@@ -150,10 +165,10 @@
                                 <label>Validation rules</label>
                                 <select2
                                         :data="validationRules"
-                                        :name="'fields['+model.id+'][validation][]'"
+                                        :name="'fields['+data.id+'][validation][]'"
                                         :placeholder="'Please select'"
                                         :multiple="true"
-                                        v-model="validation"
+                                        v-model="data.meta.validation"
                                 ></select2>
                             </div>
                         </div>
@@ -182,6 +197,7 @@
 
         data: function () {
             return {
+                model: {},
                 htmlAttributes: [
                     {id: 'required', 'text': 'Required'},
                     {id: 'disabled', 'text': 'Disabled'}
@@ -199,45 +215,17 @@
                 optionTypes: [
                     {id: 'function', 'text': 'Function'},
                     {id: 'data', 'text': 'Data'},
-                ],
-                optionsData: [],
-                optionsFunction: '',
-                optionsType: this.data['meta'] && this.data['meta']['options_type'] !== undefined ? this.data['meta']['options_type'] : 'data',
-                attributes: this.data['meta'] ? this.data['meta']['attributes'] : [],
-                validation: this.data['meta'] ? this.data['meta']['validation'] : []
+                ]
             }
         },
 
-        mounted() {
+        created() {
             this.setOptions();
-        },
-
-        computed: {
-            model: function () {
-                var modified = JSON.parse(JSON.stringify(this.data));
-
-                $.each(this.languages, function (i, language) {
-
-                    var isoCode = language.iso_code;
-                    var langObj = modified.translations[isoCode];
-                    var label = langObj ? langObj.label : '';
-                    var name = langObj ? langObj.name : '';
-                    var placeholder = langObj ? langObj.placeholder : '';
-
-                    modified.translations[isoCode] = {
-                        'label': label,
-                        'name': name,
-                        'placeholder': placeholder,
-                    };
-                });
-
-                return modified;
-            }
         },
 
         methods: {
             addOption() {
-                this.optionsData.push({
+                this.data.optionsData.push({
                     'key': '',
                     'value': ''
                 });
@@ -260,19 +248,7 @@
             },
 
             remove(field) {
-                var self = this;
-
-                swal({
-                    title: "Are you sure?",
-                    text: "You will not be able to restore this data!",
-                    type: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Delete!"
-                }).then(function () {
-                    self.$emit('remove-field', field);
-                    toastr.success('Field successfully removed!');
-                }).catch(swal.noop);
+                this.$emit('remove-field', field);
             },
 
             setOptions() {
@@ -290,12 +266,20 @@
                         }
                     }
 
-                    this.optionsType = 'data';
-                    this.optionsData = tmpArray;
+                    this.data.optionsType = 'data';
+                    this.data.optionsData = tmpArray;
+                } else if (options === undefined) {
+                    this.data.optionsType = 'data';
                 } else {
-                    this.optionsType = 'function';
-                    this.optionsFunction = options;
+                    this.data.optionsType = 'function';
+                    this.data.optionsFunction = options;
                 }
+            },
+
+            camelCase(str) {
+                return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (letter, index) {
+                    return index === 0 ? letter.toUpperCase() : letter.toLowerCase();
+                }).replace(/\s+/g, '');
             }
         }
     }

@@ -28,3 +28,10 @@
 #formApp .m-l-5 {
     margin-left: 5px;
 }
+
+#formApp .badge {
+    position: absolute;
+    top: -10px;
+    right: 0;
+    background: #d63739;
+}

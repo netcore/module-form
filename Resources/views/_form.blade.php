@@ -3,24 +3,53 @@
 @endsection
 
 <input type="hidden" id="languages" value="{{ $languages->toJson() }}"/>
-<input type="hidden" id="currentFields" value="{{ $fields->toJson() }}"/>
+<input type="hidden" id="form" value="{{ $form->toJson() }}"/>
 
-@include('translate::_partials._nav_tabs')
-
+<ul class="nav nav-tabs" role="tablist">
+    <li
+            v-for="(language, key) in languages"
+            role="presentation"
+            :class="{'active': key === 0}"
+    >
+        <a
+                :href="'#language-' + language.iso_code"
+                :aria-controls="language.iso_code"
+                role="tab"
+                data-toggle="tab"
+                class="v-cloak--hidden"
+        >
+            <span v-if="formErrors.has('translations.' + language.iso_code + '.name')" class="badge">!</span>
+            @{{ language.title_localized }}
+        </a>
+    </li>
+</ul>
 <div class="tab-content">
-    @foreach($languages as $language)
-        <div role="tabpanel" class="tab-pane {{ $loop->first ? 'active' : '' }}" id="{{ $language->iso_code }}">
-            <div class="form-group no-margin-hr">
-                {!! Form::label('name', 'Name') !!}
-                {!! Form::text('translations['.$language->iso_code.'][name]', trans_model((isset($form) ? $form : null), $language, 'name'), ['class' => 'form-control']) !!}
+    <div v-for="(language, key) in languages" role="tabpanel" class="tab-pane"
+         :class="{'active': key === 0}" :id="'language-' + language.iso_code">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-group"
+                     :class="{ 'has-error': formErrors.has('translations.' + language.iso_code + '.name') }">
+                    <label class="control-label">Name</label>
+                    <input type="text" class="form-control" :name="'translations['+language.iso_code+'][name]'"
+                           v-model="form.translations[key].name">
+                    <span v-if="formErrors.has('translations.' + language.iso_code + '.name')"
+                          class="help-block"
+                          v-text="formErrors.get('translations.' + language.iso_code + '.name')"></span>
+                </div>
             </div>
 
-            <div class="form-group no-margin-hr">
-                {!! Form::label('success_message', 'Success message') !!}
-                {!! Form::text('translations['.$language->iso_code.'][success_message]', trans_model((isset($form) ? $form : null), $language, 'success_message'), ['class' => 'form-control']) !!}
+            <div class="col-lg-6">
+                <div class="form-group"
+                     :class="{ 'has-error': formErrors.has('translations.' + language.iso_code + '.success_message') }">
+                    <label class="control-label">Success message</label>
+                    <input type="text" class="form-control"
+                           :name="'translations['+language.iso_code+'][success_message]'"
+                           v-model="form.translations[key].success_message">
+                </div>
             </div>
         </div>
-    @endforeach
+    </div>
 </div>
 
 <hr>
@@ -29,8 +58,8 @@
 
 <div class="row">
     <div class="col-lg-4">
-        <ul class="fields">
-            <li v-for="field in availableFields" @click="addField(field)" v-cloak>
+        <ul class="fields v-cloak--hidden">
+            <li v-for="field in availableFields" @click="addField(field)">
                 @{{ field.name }}
                 <i class="fa fa-chevron-right"></i>
             </li>
@@ -38,15 +67,16 @@
     </div>
 
     <div class="col-lg-8">
-        <div v-if="formFields.length">
+        <div v-if="form.fields.length">
             <div id="accordion" role="tablist" aria-multiselectable="true">
-                <draggable v-model="formFields" @update="updateOrder" :options="{handle:'.handle'}">
-                    <form-field v-for="field in formFields" :data="field" :key="field.id" v-on:remove-field="removeField(field)" :languages="languages"></form-field>
+                <draggable v-model="form.fields" @update="updateOrder" :options="{handle:'.handle'}">
+                    <form-field v-for="(field, key) in form.fields" :data="field" :key="key"
+                                v-on:remove-field="removeField(field)" :languages="languages"></form-field>
                 </draggable>
             </div>
         </div>
         <div v-else>
-            <div class="alert alert-info">No fields added</div>
+            <div class="alert alert-danger v-cloak--hidden">Please add fields!</div>
         </div>
     </div>
 </div>

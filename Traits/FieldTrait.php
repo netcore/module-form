@@ -11,28 +11,16 @@ trait FieldTrait
      * @param null $data
      * @return Collection
      */
-    private function getFields($data = null): Collection
+    private function getFields($data): Collection
     {
-        $currentFields = [];
-        $oldFields = old('fields', []);
+        $fields = $data->fields()->with('translations')->orderBy('order', 'ASC')->get()->transform(function (
+            $f
+        ) {
+            $field = $f->toArray();
+            $field['translations'] = $f->translations->keyBy('locale');
 
-        if ($data) {
-            $currentFields = $data->fields()->with('translations')->orderBy('order', 'ASC')->get()->transform(function (
-                $f
-            ) {
-                $field = $f->toArray();
-                $field['translations'] = $f->translations->keyBy('locale');
-
-                return $field;
-            })->toArray();
-        }
-
-        $fields = array_merge($oldFields, $currentFields);
-
-        // Unique
-        $fields = array_filter($fields, function ($value, $key) use ($fields) {
-            return $key === array_search($value['id'], array_column($fields, 'id'));
-        }, ARRAY_FILTER_USE_BOTH);
+            return $field;
+        })->toArray();
 
         return collect($fields)->map(function ($field, $id) {
             return $this->mapField($id, $field);
@@ -50,12 +38,11 @@ trait FieldTrait
         $languages = TransHelper::getAllLanguages();
 
         foreach ($languages as $key => $language) {
-            $name = isset($field['translations'][$language->iso_code]) && isset($field['translations'][$language->iso_code]['label']) ? $field['translations'][$language->iso_code]['label'] : (isset($field['translations'][$key]['label']) ? $field['translations'][$key]['label'] : '(Not specified)');
+            $label = isset($field['translations'][$language->iso_code]) && isset($field['translations'][$language->iso_code]['label']) ? $field['translations'][$language->iso_code]['label'] : (isset($field['translations'][$key]['label']) ? $field['translations'][$key]['label'] : '(Not specified)');
             $placeholder = isset($field['translations'][$language->iso_code]) && isset($field['translations'][$language->iso_code]['placeholder']) ? $field['translations'][$language->iso_code]['placeholder'] : (isset($field['translations'][$key]['placeholder']) ? $field['translations'][$key]['placeholder'] : '');
 
             $translations[$language->iso_code] = [
-                'name'        => $name,
-                'label'       => $name,
+                'label'       => $label,
                 'placeholder' => $placeholder
             ];
         }
@@ -64,10 +51,11 @@ trait FieldTrait
             'id'           => isset($field['id']) ? (int)$field['id'] : (int)$id,
             'key'          => isset($field['key']) ? $field['key'] : '',
             'type'         => $field['type'],
-            'type_name'    => ucfirst($field['type']),
             'translations' => $translations,
             'order'        => isset($field['order']) ? (int)$field['order'] : (int)$id + 1,
-            'meta'         => $this->parseData($field, 'meta')
+            'meta'         => $this->parseData($field, 'meta'),
+            'show_label'   => $field['show_label'],
+            'optionsType'  => ''
         ];
     }
 
@@ -100,6 +88,7 @@ trait FieldTrait
     private function field($formField, $order = null, $action = 'update'): array
     {
         $data = [
+            'key'        => isset($formField['key']) ? $formField['key'] : '',
             'meta'       => [
                 'attributes'   => $this->parseData($formField, 'attributes'),
                 'options'      => $this->parseData($formField, 'options'),
@@ -111,7 +100,6 @@ trait FieldTrait
         ];
 
         if ($action === 'create') {
-            $data['key'] = isset($formField['key']) ? $formField['key'] : '';
             $data['type'] = $formField['type'];
         }
 

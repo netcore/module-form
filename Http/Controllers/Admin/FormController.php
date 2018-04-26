@@ -6,6 +6,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Modules\Form\Http\Requests\Admin\FormsRequest;
 use Modules\Form\Models\Form;
+use Modules\Form\Models\FormField;
 use Modules\Form\Traits\ExportTrait;
 use Modules\Form\Traits\FieldTrait;
 use Netcore\Translator\Helpers\TransHelper;
@@ -34,9 +35,20 @@ class FormController extends Controller
     public function create()
     {
         $languages = TransHelper::getAllLanguages();
-        $fields = $this->getFields();
+        $translations = $languages->mapWithKeys(function ($item, $i) {
+            return [
+                $i => [
+                    'name'            => '',
+                    'success_message' => ''
+                ]
+            ];
+        })->toArray();
+        $form = collect([
+            'translations' => $translations,
+            'fields'       => []
+        ]);
 
-        return view('form::create', compact('languages', 'fields'));
+        return view('form::create', compact('languages', 'form'));
     }
 
     /**
@@ -57,7 +69,12 @@ class FormController extends Controller
             $field->storeTranslations($formField['translations']);
         }
 
-        return redirect()->route('admin::form.index')->withSuccess('Successfully created');
+        session()->flash('success', 'Form successfully created');
+
+        return response()->json([
+            'message'  => 'Form successfully created',
+            'redirect' => route('admin::form.edit', $form)
+        ]);
     }
 
     /**
@@ -69,7 +86,7 @@ class FormController extends Controller
     public function edit(Form $form)
     {
         $languages = TransHelper::getAllLanguages();
-        $fields = $this->getFields($form);
+        $form->fields = $this->getFields($form);
 
         return view('form::edit', compact('form', 'languages', 'fields'));
     }
@@ -85,11 +102,10 @@ class FormController extends Controller
     {
         $form->updateTranslations($request->get('translations', []));
 
-        $formFields = $form->fields->toArray();
-        $newFields = $request->get('fields', []);
+        $fields = $request->get('fields', []);
 
         // Fields
-        foreach ($newFields as $formField) {
+        foreach ($fields as $formField) {
             $field = $form->fields()->where('id', $formField['id'])->first();
 
             if (!$field) {
@@ -101,21 +117,12 @@ class FormController extends Controller
             }
         }
 
-        // Remove fields
-        $fieldsToRemove = array_udiff($formFields, $newFields, function ($a, $b) {
-            return strcmp($a['id'], $b['id']);
-        });
-        foreach ($fieldsToRemove as $formField) {
-            $field = $form->fields()->where('id', $formField['id'])->first();
+        session()->flash('success', 'Form successfully saved');
 
-            if (!$field) {
-                continue;
-            }
-
-            $field->delete();
-        }
-
-        return back()->withSuccess('Successfully saved');
+        return response()->json([
+            'message'  => 'Form successfully saved',
+            'redirect' => route('admin::form.edit', $form)
+        ]);
     }
 
     /**
@@ -136,5 +143,20 @@ class FormController extends Controller
         }
 
         return back()->withSuccess('Successfully deleted');
+    }
+
+    /**
+     * @param Form      $form
+     * @param FormField $field
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
+    public function destroyField(Form $form, FormField $field)
+    {
+        $field->delete();
+
+        return response()->json([
+            'state' => 'success'
+        ]);
     }
 }

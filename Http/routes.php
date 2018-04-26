@@ -20,6 +20,11 @@ Route::group([
         'except' => ['show'],
     ]);
 
+    Route::post('form/{form}/{field}', [
+        'as'   => 'form.destroy.field',
+        'uses' => 'FormController@destroyField'
+    ]);
+
     Route::get('form/{form}/export/{type?}', [
         'as'   => 'form.export',
         'uses' => 'FormController@export'
