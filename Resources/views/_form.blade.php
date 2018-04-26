@@ -54,6 +54,32 @@
 
 <hr>
 
+<div class="row">
+    <div class="col-lg-9">
+        <div class="form-group"
+             :class="{ 'has-error': formErrors.has('key') }">
+            <label>Key</label>
+            <input type="text" :name="'key'" v-model="form.key" class="form-control"/>
+            <span v-if="formErrors.has('key')"
+                  class="help-block"
+                  v-text="formErrors.get('key')"></span>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="form-group"
+             :class="{ 'has-error': formErrors.has('has_success_view') }">
+            <label>Has success view?</label><br/>
+            <label for="success-view" class="switcher switcher-success">
+                <input type="checkbox" id="success-view" :name="'has_success_view'" v-model="form.has_success_view">
+                <div class="switcher-indicator">
+                    <div class="switcher-yes">YES</div>
+                    <div class="switcher-no">NO</div>
+                </div>
+            </label>
+        </div>
+    </div>
+</div>
+
 {!! Form::label('fields', 'Fields') !!}
 
 <div class="row">
