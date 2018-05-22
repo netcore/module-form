@@ -6,8 +6,8 @@ use Dimsav\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Translate\Traits\SyncTranslations;
 use Modules\Form\Translations\FormFieldTranslation;
+use Modules\Translate\Traits\SyncTranslations;
 
 class FormField extends Model
 {
@@ -87,7 +87,7 @@ class FormField extends Model
         }
 
         return $parsed ? implode(' ', array_map(function ($v, $k) {
-            return sprintf('%s=%s', $k, $v);
+            return !is_numeric($k) ? sprintf('%s=%s', $k, $v) : $v . '=' . $v;
         }, $attributes, array_keys($attributes))) : $attributes;
     }
 
@@ -136,5 +136,26 @@ class FormField extends Model
         ];
 
         return array_get($classes, $this->type, 'form-control');
+    }
+
+    /**
+     * @param $locale
+     * @return array
+     */
+    public function formatResponse($locale)
+    {
+        $field = $this;
+        $translation = $field->translateOrNew($locale);
+
+        return [
+            'id'          => $field->id,
+            'type'        => $field->type,
+            'key'         => $field->key,
+            'label'       => $translation->label,
+            'placeholder' => $translation->placeholder,
+            'show_label'  => $field->show_label,
+            'attributes'  => $field->getAttributesData(),
+            'options'     => $field->getOptionsData()
+        ];
     }
 }
