@@ -112,6 +112,7 @@ class Form extends Model
             'id'              => $this->id,
             'key'             => $this->key,
             'name'            => $translation->name,
+            'url'             => route('form::store', $this),
             'success_message' => $translation->success_message,
             'fields'          => $this->fields->sortBy('order')->map(function ($field) use ($locale) {
                 return $field->formatResponse($locale);
