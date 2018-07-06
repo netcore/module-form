@@ -86,9 +86,13 @@ class FormField extends Model
             $attributes = [];
         }
 
-        return $parsed ? implode(' ', array_map(function ($v, $k) {
+        $attributes = collect($attributes);
+
+        return $parsed ? implode(' ', $attributes->map(function ($v, $k) {
             return !is_numeric($k) ? sprintf('%s=%s', $k, $v) : $v . '=' . $v;
-        }, $attributes, array_keys($attributes))) : $attributes;
+        })->toArray()) : $attributes->mapWithKeys(function ($v, $k) {
+            return is_numeric($k) ? [$v => $v] : [$k => $v];
+        });
     }
 
     /**
@@ -154,7 +158,7 @@ class FormField extends Model
             'label'       => $translation->label,
             'placeholder' => $translation->placeholder,
             'show_label'  => $field->show_label,
-            'attributes'  => $field->getAttributesData(),
+            'attributes'  => $field->getAttributesData($parsed = false),
             'options'     => $field->getOptionsData()
         ];
     }
