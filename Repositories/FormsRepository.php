@@ -38,7 +38,7 @@ class FormsRepository
     {
         $request->validate($form->getValidationRules());
 
-        if ($this->config['honeypot_enabled'] && ! empty($request->get($this->config['honeypot_field_name']))) {
+        if ($this->config['honeypot_enabled'] && !empty($request->get($this->config['honeypot_field_name']))) {
             return false;
         }
 
@@ -53,7 +53,7 @@ class FormsRepository
                     $fileName = md5($form->id . $field->key . time()) . '.' . $file->getClientOriginalExtension();
 
                     $path = public_path($this->config['uploads_path']);
-                    if (! \File::exists($path)) {
+                    if (!\File::exists($path)) {
                         \File::makeDirectory($path, 0775, true);
                     }
 
@@ -102,7 +102,7 @@ class FormsRepository
                 $form = Form::where('key', $form)->first();
             }
 
-            if (! $form) {
+            if (!$form) {
                 return '';
             }
 
@@ -124,7 +124,7 @@ class FormsRepository
             $form = Form::where('key', $form)->first();
         }
 
-        if (! $form) {
+        if (!$form) {
             return '';
         }
 

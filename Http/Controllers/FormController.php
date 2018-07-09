@@ -19,7 +19,13 @@ class FormController extends Controller
     public function store(Request $request, Form $form)
     {
         if (!app('forms')->storeEntries($request, $form)) {
-            return back();
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Something went wrong, please, try again!'
+                ], 422);
+            }
+
+            return back()->withError('Something went wrong, please, try again!');
         }
 
         if ($form->has_success_view) {

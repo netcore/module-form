@@ -92,7 +92,7 @@ class Form extends Model
         foreach ($this->fields as $field) {
             if ($rules = $field->getValidationRules()) {
                 foreach ($rules as $rule) {
-                    $array[$field->key][] = $rule == 'unique' ? new FormUnique($this) : $rule;
+                    $array[$field->key][] = $rule === 'unique' ? new FormUnique($this) : $rule;
                 }
             }
         }
@@ -114,6 +114,10 @@ class Form extends Model
             'name'            => $translation->name,
             'url'             => route('form::store', $this),
             'success_message' => $translation->success_message,
+            'honeypot'        => [
+                'enabled'    => config('netcore.module-form.honeypot_enabled'),
+                'field_name' => config('netcore.module-form.honeypot_field_name'),
+            ],
             'fields'          => $this->fields->sortBy('order')->map(function ($field) use ($locale) {
                 return $field->formatResponse($locale);
             })

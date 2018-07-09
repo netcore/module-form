@@ -4,7 +4,7 @@ Route::group([
     'middleware' => ['web'],
     'namespace'  => 'Modules\Form\Http\Controllers'
 ], function () {
-    Route::put('/form/{form}', [
+    Route::post('/form/{form}', [
         'as'   => 'form::store',
         'uses' => 'FormController@store'
     ]);
