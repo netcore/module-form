@@ -78,7 +78,7 @@ class FormField extends Model
      * @param bool $parsed
      * @return array
      */
-    public function getAttributesData($parsed = true)
+    public function getAttributesData($parsed = true): array
     {
         $attributes = array_get($this->meta, 'attributes', []);
 
@@ -92,13 +92,13 @@ class FormField extends Model
             return !is_numeric($k) ? sprintf('%s=%s', $k, $v) : $v . '=' . $v;
         })->toArray()) : $attributes->mapWithKeys(function ($v, $k) {
             return is_numeric($k) ? [$v => $v] : [$k => $v];
-        });
+        })->toArray();
     }
 
     /**
      * @return array
      */
-    public function getOptionsData()
+    public function getOptionsData(): array
     {
         $options = array_get($this->meta, 'options', []);
         if (is_array($options)) {
@@ -117,7 +117,7 @@ class FormField extends Model
     }
 
     /**
-     * @return mixed
+     * @return array|mixed
      */
     public function getValidationRules()
     {
@@ -146,7 +146,7 @@ class FormField extends Model
      * @param $locale
      * @return array
      */
-    public function formatResponse($locale)
+    public function formatResponse($locale): array
     {
         $field = $this;
         $translation = $field->translateOrNew($locale);
