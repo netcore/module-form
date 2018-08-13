@@ -11,15 +11,18 @@
                         <a href="{{ route('admin::form.export', $form->id) }}" class="btn btn-xs btn-success">
                             <i class="fa fa-file-excel-o"></i> Export (XLS)
                         </a>
+
                         <a href="{{ route('admin::form.export', [$form->id, 'csv']) }}" class="btn btn-xs btn-success">
                             <i class="fa fa-file-o"></i> Export (CSV)
                         </a>
+
                         <a href="{{ route('admin::form.index') }}" class="btn btn-xs btn-primary">
                             <i class="fa fa-undo"></i> Back to list
                         </a>
                     </div>
                     <h4 class="panel-title">Form "{{ $form->name }}" entries</h4>
                 </div>
+
                 <div class="panel-body">
                     <table class="table table-bordered" id="datatable">
                         <thead>
@@ -51,7 +54,10 @@
 
                 columns: [
                     @foreach ($form->fields->sortBy('order') as $field)
-                    {data: '{{ $field->key }}', name: '{{ $field->key }}'},
+                    {
+                    	data: '{{ $field->key }}',
+                        name: '{{ $field->key }}'
+                    },
                     @endforeach
                     {
                         data: 'created_at',
