@@ -10,8 +10,10 @@
                             <i class="fa fa-undo"></i> Back to list
                         </a>
                     </div>
+
                     <h4 class="panel-title">View entry</h4>
                 </div>
+
                 <div class="panel-body">
                     <div class="table-primary">
                         <table class="table table-bordered">
@@ -24,10 +26,14 @@
                             <tbody>
                             @foreach ($form->fields as $field)
                                 <tr>
-                                    <td width="20%">{{ $field->label }}:</td>
+                                    <td width="20%">
+                                        {{ $field->label }}:
+                                    </td>
                                     <td>
                                         @if ($field->type === 'file')
-                                            <a href="{{ asset(config('netcore.module-form.uploads_path') . array_get($entry, $field->key, '')) }}">{{ array_get($entry, $field->key, '') }}</a>
+                                            <a href="{{ asset(config('netcore.module-form.uploads_path') . array_get($entry, $field->key, '')) }}">
+                                                {{ array_get($entry, $field->key, '') }}
+                                            </a>
                                         @else
                                             {{ array_get($entry, $field->key, '') }}
                                         @endif
@@ -37,12 +43,35 @@
                             </tbody>
                         </table>
                     </div>
-                    <b>Additional information:</b><br/>
-                    Date/Time: {{ $entryLog ? $entryLog->created_at->format('d.m.Y H:i') : '' }}<br/>
-                    IP: {{ $entryLog ? $entryLog->ip : '' }}<br/>
-                    User Agent: {{ $entryLog ? $entryLog->user_agent : '' }}<br/>
+
+                    <b>Additional information:</b>
+                    <hr>
+
+                    <ul>
+                        <li><b>IP:</b> {{ $entryLog ? $entryLog->ip : '' }}</li>
+                        <li><b>Date/Time:</b> {{ $entryLog ? $entryLog->created_at->format('d.m.Y H:i') : '' }}</li>
+                        <li><b>User Agent:</b> {{ $entryLog ? $entryLog->user_agent : '' }}</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+@endsection
+
+@section('styles')
+    <style type="text/css">
+        table tbody tr td {
+            overflow-wrap: break-word;
+
+            word-wrap: break-word;
+            word-break: break-all;
+            word-break: break-word;
+            -ms-word-break: break-all;
+
+            hyphens: auto;
+            -ms-hyphens: auto;
+            -moz-hyphens: auto;
+            -webkit-hyphens: auto;
+        }
+    </style>
 @endsection
